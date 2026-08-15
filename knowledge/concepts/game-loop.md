@@ -83,6 +83,13 @@ claims:
       quote_or_paraphrase: "A simple program that uses all three might look this: ... IF (BTNP(5)) COL = 8 + RND(8) ... CIRCFILL(64,64,32,COL)"
     classification: "fact"
     confidence: "high"
+  - id: "pico8.concept.game-loop.claim.10"
+    statement: "Es posible proporcionar un bucle principal manual."
+    evidence:
+      locator: "5 PICO-8 Program Structure"
+      quote_or_paraphrase: "It is possible to provide your own main loop manually."
+    classification: "fact"
+    confidence: "high"
 ---
 
 ## Hechos verificados
@@ -108,7 +115,7 @@ end
 
 ## Modelo mental
 
-PICO-8 es dueño del bucle y del ritmo de frames: el autor define callbacks y no un `while` propio. El código de todos los tabs se concatena y ejecuta como un único programa. El modo base es 30fps; definir `_update60` cambia a 60fps con la mitad de presupuesto de CPU por frame; si el dibujo no cabe, cae a 15fps duplicando las actualizaciones por frame visible.
+PICO-8 normalmente dirige el ciclo mediante callbacks opcionales: el autor puede definir `_init`, `_update` y `_draw`, o proporcionar un bucle principal manual. El código de todos los tabs se concatena y ejecuta como un único programa. El modo base es 30fps; definir `_update60` cambia a 60fps con la mitad de presupuesto de CPU por frame; si el dibujo no cabe, cae a 15fps duplicando las actualizaciones por frame visible.
 
 ## Consecuencias de implementación
 
@@ -124,4 +131,4 @@ PICO-8 es dueño del bucle y del ritmo de frames: el autor define callbacks y no
 
 ## Ambigüedades
 
-La fuente describe `_draw` como "una vez por frame visible" y a la vez dice que normalmente se llama a 30fps; el ritmo efectivo depende del host y del modo. Se conservan ambas afirmaciones como hechos.
+Ninguna documentada.
