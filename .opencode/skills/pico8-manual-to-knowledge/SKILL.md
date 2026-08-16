@@ -95,6 +95,72 @@ Responde con un plan cerrado que liste exactamente:
 - dominios y rutas expresamente excluidos;
 - comando de validación que se ejecutará.
 
+Antes de redactar el PLAN, lee `templates/phase-plan.md` y sigue su estructura.
+No sustituyas sus tablas obligatorias por listas abreviadas ni declares que un
+control ha pasado si la evidencia visual requerida por la plantilla no aparece
+en el propio PLAN.
+
+### Manifiesto verificable del PLAN
+
+Antes de mostrar cualquier PLAN al usuario, lee
+`references/phase-manifest-schema.md` y crea un manifiesto JSON temporal en
+`/tmp/pico8-phase-<fase>.json`. No escribas este manifiesto dentro del proyecto
+ni dentro de `knowledge/`.
+
+El manifiesto es la única fuente de verdad para:
+
+- `allowed_paths` de la fase;
+- todos los archivos nuevos y modificados;
+- cada fila de restricción atómica;
+- las incertidumbres previstas.
+
+Ejecuta obligatoriamente:
+
+```sh
+python3 .opencode/skills/pico8-manual-to-knowledge/scripts/validate_phase_plan.py /tmp/pico8-phase-<fase>.json --render-plan
+```
+
+Si el comando falla, corrige el manifiesto y vuelve a ejecutarlo. No muestres un
+PLAN ni pidas `CONFIRMO` hasta que termine con `PLAN válido`. Copia literalmente
+todo el bloque delimitado por `PICO8-PLAN-MANIFEST-START` y
+`PICO8-PLAN-MANIFEST-END`; no lo reescribas, resumas ni sustituyas por tablas
+manuales. Ese bloque contiene archivos creados/modificados, tabla atómica e
+incertidumbres. El PLAN Markdown no puede enumerar rutas, restricciones o
+incertidumbres fuera de ese bloque.
+
+### Verificación mecánica obligatoria del PLAN.md
+
+No confíes en releer o contar celdas a simple vista para comprobar que copiaste
+el bloque sin alterarlo: ese control ya falló en producción pese a estar
+explícitamente instruido en este mismo skill. Antes de mostrar el PLAN al
+usuario:
+
+1. Escribe el documento PLAN completo (con el bloque del manifiesto ya pegado
+   dentro) en `/tmp/pico8-phase-<fase>-plan.md`.
+2. Ejecuta obligatoriamente:
+
+   ```sh
+   python3 .opencode/skills/pico8-manual-to-knowledge/scripts/validate_phase_plan.py /tmp/pico8-phase-<fase>.json --verify-plan-md /tmp/pico8-phase-<fase>-plan.md
+   ```
+
+Este comando recalcula la salida canónica a partir del manifiesto real y la
+compara, carácter por carácter, contra el bloque que efectivamente quedó en tu
+archivo. Detecta mecánicamente cualquier tabla con menos columnas de las
+esperadas, cualquier incertidumbre sin `acción`, y cualquier reformulación del
+bloque, sin depender de que lo audites tú mismo. Sólo puedes mostrar el PLAN al
+usuario y pedir `CONFIRMO` cuando este comando termine con
+`PLAN.md verificado: coincide con el manifiesto`. Si informa una discrepancia,
+el PLAN es inválido: corrige el archivo (normalmente pegando de nuevo, sin
+editar, la salida de `--render-plan`) y repite la verificación.
+
+Si tu entorno no te permite ejecutar comandos de shell, no generes un bloque que
+aparente ser la salida de estos scripts. Indica explícitamente al usuario que no
+puedes ejecutar la validación mecánica del PLAN y detente antes de pedir
+`CONFIRMO`.
+
+Incluye ambas líneas de salida, `PLAN válido: ...` y
+`PLAN.md verificado: coincide con el manifiesto`, en la puerta de calidad.
+
 Termina el paso PLAN con la frase exacta: `Esperando CONFIRMO para ejecutar esta
 fase.` No escribas archivos, no crees directorios y no descargues fuentes durante
 el paso PLAN.
@@ -112,6 +178,10 @@ Durante la ejecución:
 - no continúes automáticamente a otra fase, aunque termines antes de lo previsto;
 - al terminar, ejecuta el validador, informa su salida y detente.
 
+Antes de escribir el primer archivo, vuelve a ejecutar el validador del
+manifiesto temporal. Si el manifiesto ya no existe o falla, no ejecutes la fase:
+vuelve al paso PLAN y solicita una confirmación sobre un PLAN válido.
+
 Una fase posterior requiere una nueva invocación o un nuevo contrato de fase y
 otra confirmación `CONFIRMO`.
 
@@ -124,19 +194,24 @@ otra confirmación `CONFIRMO`.
 3. Crea documentos pequeños y de un único tipo: `api`, `constraint`, `concept` o
    `example`. Una función o callback es un documento `api`; no agrupes APIs no
    equivalentes.
+   Los operadores, abreviaturas, directivas, modos o variantes de sintaxis no
+   son `kind: api` por sí mismos: documéntalos como claims de la función,
+   callback o concepto que representan. Por ejemplo, `@ADDR`, `%ADDR` y `$ADDR`
+   se documentan respectivamente en `pico8.api.peek`, `pico8.api.peek2` y
+   `pico8.api.peek4`, no en un documento `peek-operators`.
 4. Toda afirmación factual debe tener una entrada en `claims` con un localizador
    concreto en el manual: título de sección, encabezado de API o rango de líneas
    de la instantánea TXT. No declares como `verified` aquello que no puedas
    localizar.
 5. Las deducciones de ingeniería son válidas sólo si se marcan como `derived`.
-   Las dudas o conflictos se marcan como `ambiguous` y nunca se resuelven por
-   suposición.
+   Clasifica toda incertidumbre con la puerta de clasificación de este skill;
+   no la llames `ambiguous` por defecto ni la resuelvas por suposición.
 6. Usa IDs estables con el prefijo `pico8.` y enlaza documentos mediante
    `relationships`; no dependas de texto libre para enlazarlos.
 7. Actualiza `knowledge/index.md` sólo con los documentos de las rutas autorizadas
    en esta fase. Puede contener una sección "pendiente" para dominios no
    procesados, pero no puede listar documentos que no existen.
-8. Ejecuta `python3 scripts/validate_knowledge.py knowledge` al terminar. Corrige
+8. Ejecuta `python3 .opencode/skills/pico8-manual-to-knowledge/scripts/validate_knowledge.py knowledge` al terminar. Corrige
    todos los errores antes de declarar éxito. Los avisos deben quedar explicados
    en la respuesta final.
 
@@ -197,6 +272,41 @@ Controles adicionales obligatorios:
 Estos siete controles son parte de la puerta de calidad y se verifican antes de
 mostrar `Esperando CONFIRMO`.
 
+Controles de aprobación para restricciones:
+
+8. El PLAN debe incluir la tabla atómica completa de **todas** las restricciones
+   planificadas. Debe contener exactamente una fila por archivo `kind:
+   constraint`, con las ocho columnas `ruta | id | subject | property | operator
+   | value | unit | scope`. Si falta la tabla, falta una fila, una ruta se repite
+   o el número de filas no coincide con el número declarado de restricciones, el
+   PLAN falla y no puede pedir `CONFIRMO`.
+9. Una restricción pertenece a una única capacidad o contrato de uso. Cuando un
+   mismo límite numérico se aplica a APIs distintas, crea un documento por API:
+   el límite de resultados de `peek()` y el límite de valores de `poke()` deben
+   ser `peek-result-max` y `poke-values-max`, nunca `peek-poke-burst-max`.
+   Comparte la evidencia fuente mediante claims y `relationships`, no agrupando
+   consumidores distintos en `subject`, `property` o `scope`.
+
+No marques la puerta de calidad como aprobada si los controles 8 o 9 requieren
+interpretación: divide primero la restricción y vuelve a contar las rutas.
+
+La tabla debe usar literalmente esta cabecera Markdown, sin abreviarla ni
+reemplazarla por un resumen de cuatro columnas:
+
+```text
+| ruta | id | subject | property | operator | value | unit | scope |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+```
+
+No marques `8. ✅` basándote en una lectura o conteo visual de la tabla: ese
+control ya falló en producción a pesar de esta misma instrucción explícita.
+Márcalo `✅` únicamente si `--verify-plan-md` (ver sección "Verificación
+mecánica obligatoria del PLAN.md") terminó con
+`PLAN.md verificado: coincide con el manifiesto`. Si no ejecutaste ese comando
+sobre el PLAN.md final, o si reportó una discrepancia, el control 8 es `❌` sin
+excepción, y no puede marcarse `✅` "de todos modos" aunque la tabla parezca
+correcta a simple vista.
+
 ## Contrato atómico de restricciones
 
 Para cada archivo `kind: constraint` incluido en el PLAN, muestra una fila con
@@ -212,6 +322,10 @@ propiedad. No se permiten listas, valores separados por comas, ni combinaciones
 de dos límites en una misma fila. Si una fuente ofrece dos números relacionados
 pero con unidades, ámbitos o propiedades propios, crea dos documentos y dos
 filas, aunque puedan enlazarse mediante `relationships`.
+
+La misma regla aplica a consumidores: un valor idéntico no justifica combinar
+dos APIs, registros o capacidades. La columna `scope` debe describir un único
+consumidor; usa el ID del documento API cuando exista.
 
 Ejemplo correcto:
 
@@ -238,6 +352,68 @@ Del mismo modo, el valor del bloque `constraint:` debe conservar la unidad y
 granularidad expresadas por la fuente. Una conversión (por ejemplo, `32k` a
 bytes) sólo puede aparecer en una claim o nota `derived`, claramente etiquetada,
 y no puede sustituir el valor factual del límite.
+
+## Puerta de clasificación de incertidumbre
+
+Antes de añadir una entrada a `## Ambigüedades`, clasifícala como exactamente una
+de estas categorías:
+
+- `ambiguity`: dos o más claims de las secciones autorizadas para la fase son
+  incompatibles para la misma pregunta. Registra los IDs o localizadores de las
+  claims y explica por qué no pueden coexistir.
+- `source-limitation`: la fuente no especifica un detalle necesario. Indica qué
+  falta, sin inferir su comportamiento.
+- `cross-domain-dependency`: otra sección o fase contiene información adicional
+  sobre la misma API, registro o recurso. Registra la sección o ID pendiente en
+  `## Documentos relacionados` o en el índice; no es una contradicción.
+- `approximation`: la fuente usa un calificador como "around" o
+  "approximately". Conserva el calificativo en la claim y el operador; no lo
+  presentes como conflicto.
+- `source-typo`: errata tipográfica localizable que no cambia el contrato
+  normalizado. Regístrala como nota de fuente, no como ambigüedad semántica.
+
+Información sobre bits, parámetros, casos de uso o efectos diferentes de un
+mismo registro no es una ambigüedad si puede coexistir como parte de un bitfield
+o de una API más amplia. La ausencia de una sección fuera de alcance tampoco es
+una ambigüedad: usa `cross-domain-dependency` y deja el detalle pendiente para
+la fase propietaria.
+
+En el PLAN, muestra las incertidumbres previstas en una tabla:
+
+```text
+documento | categoría | evidencia/localizador | acción
+```
+
+Si no hay ambigüedades reales, declara `Ninguna` para esa categoría. No pidas
+`CONFIRMO` si una entrada marcada `ambiguity` no contiene dos fuentes
+incompatibles y autorizadas.
+
+La columna `categoría` de la tabla es un enum cerrado: sólo acepta
+`ambiguity`, `source-limitation`, `cross-domain-dependency`, `approximation` o
+`source-typo`. Una etiqueta como `compatible claims`, `nota`, `riesgo` o similar
+no es válida. Si dos claims son compatibles, no se incluyen como incertidumbre:
+se documentan normalmente en sus documentos y, si ayuda a la recuperación, se
+unen con `relationships`.
+
+## Unidades de restricciones ligadas a APIs
+
+Cuando una restricción limite un parámetro, retorno o cantidad de una API, la
+columna `unit` debe expresar la semántica del contrato de esa API, no el formato
+interno de almacenamiento. Por ejemplo:
+
+```text
+PEEK(ADDR, [N]) máximo N=8192  -> unit: results
+POKE(ADDR, VAL1, VAL2, ...)    -> unit: values
+```
+
+Un resultado o valor puede estar representado internamente como byte, palabra o
+número, pero esa representación sólo se documenta como un hecho adicional si la
+fuente la especifica. No cambies `results` o `values` por `bytes` salvo que el
+límite fuente esté expresado explícitamente en bytes.
+
+En la puerta de calidad del PLAN, verifica y declara que toda restricción cuyo
+`scope` referencia un ID `pico8.api.*` usa la unidad semántica de la firma. Si
+no se puede determinar, usa `source-limitation` y no inventes una unidad.
 
 ## Plantillas
 

@@ -1,0 +1,33 @@
+{
+  "phase": "map-memory",
+  "allowed_paths": [
+    "knowledge/api-map/",
+    "knowledge/constraints/",
+    "knowledge/index.md"
+  ],
+  "created": [
+    {"path": "knowledge/api-map/mget.md", "kind": "api", "id": "pico8.api.mget"},
+    {"path": "knowledge/constraints/map-width.md", "kind": "constraint", "id": "pico8.constraint.map-width"}
+  ],
+  "modified": ["knowledge/index.md"],
+  "constraints": [
+    {
+      "path": "knowledge/constraints/map-width.md",
+      "id": "pico8.constraint.map-width",
+      "subject": "map",
+      "property": "grid-width",
+      "operator": "fixed",
+      "value": "128",
+      "unit": "tiles",
+      "scope": "default map layout"
+    }
+  ],
+  "uncertainties": [
+    {
+      "document": "knowledge/constraints/map-width.md",
+      "category": "cross-domain-dependency",
+      "evidence": "6.7 > Remapping Graphics and Map Data > 0x5F57 MAP SIZE",
+      "action": "Registrar que el ancho es el valor por defecto y puede remapearse via 0x5F57; no tratarlo como límite absoluto de hardware."
+    }
+  ]
+}
