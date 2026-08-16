@@ -3,7 +3,7 @@ schema_version: "1.0"
 id: "pico8.concept.game-loop"
 kind: "concept"
 title: "Ciclo de juego PICO-8"
-summary: "PICO-8 ejecuta _init, _update y _draw cuando están definidos; el bucle corre a 30fps (o 60fps con _update60)."
+summary: "PICO-8 ejecuta _init, _update y _draw cuando están definidos; el bucle corre a 30fps (60fps con _update60, o cae a 15fps duplicando _update si _draw no llega a tiempo)."
 status: "verified"
 source:
   source_id: "pico8-manual-v0.2.7"

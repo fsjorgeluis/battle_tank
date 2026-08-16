@@ -171,7 +171,7 @@ Mapa de recuperación de la base generada desde `sources/pico8-manual-v0.2.7.htm
 
 | ID | Tipo | Resumen | Estado | Ruta |
 | --- | --- | --- | --- | --- |
-| `pico8.api.load` | api | Cargar cartucho, reemplazando RAM, código y editor | verified | `knowledge/api-system/load.md` |
+| `pico8.api.load` | api | Carga un cartucho (o cart BBS por id '#'), con breadcrumb y string de parámetros accesible por stat(6). | verified | `knowledge/api-system/load.md` |
 | `pico8.api.save` | api | Guardar el cartucho actual en disco | verified | `knowledge/api-system/save.md` |
 | `pico8.api.folder` | api | Abrir la carpeta de cartuchos del sistema | verified | `knowledge/api-system/folder.md` |
 | `pico8.api.ls` | api | Listar los cartuchos del sistema | verified | `knowledge/api-system/ls.md` |
@@ -179,9 +179,9 @@ Mapa de recuperación de la base generada desde `sources/pico8-manual-v0.2.7.htm
 | `pico8.api.stop` | api | Detener la ejecución del cartucho | verified | `knowledge/api-system/stop.md` |
 | `pico8.api.resume` | api | Reanudar la ejecución detenida del cartucho | verified | `knowledge/api-system/resume.md` |
 | `pico8.api.assert` | api | Falla la ejecución si la condición es falsa | verified | `knowledge/api-system/assert.md` |
-| `pico8.api.reboot` | api | Reiniciar el cartucho y volver a ejecutar `_init` | verified | `knowledge/api-system/reboot.md` |
-| `pico8.api.reset` | api | Recargar el cartucho desde disco | verified | `knowledge/api-system/reset.md` |
-| `pico8.api.info` | api | Información del cartucho: autor, título, versión | verified | `knowledge/api-system/info.md` |
+| `pico8.api.reboot` | api | Reinicia la máquina; útil para empezar un proyecto nuevo. | verified | `knowledge/api-system/reboot.md` |
+| `pico8.api.reset` | api | Restaura los valores por defecto de la RAM de estado 0x5f00..0x5f7f (paleta, cámara, recorte y patrón de relleno). | verified | `knowledge/api-system/reset.md` |
+| `pico8.api.info` | api | Imprime información del cartucho: tamaño de código, tokens y tamaño comprimido, además de indicadores de cambios sin guardar. | verified | `knowledge/api-system/info.md` |
 | `pico8.api.flip` | api | Actualizar la pantalla y esperar el fin del frame | verified | `knowledge/api-system/flip.md` |
 | `pico8.api.printh` | api | Imprimir en la consola del host | verified | `knowledge/api-system/printh.md` |
 | `pico8.api.time` | api | Tiempo de ejecución en segundos (1/30 con `_update60`) | verified | `knowledge/api-system/time.md` |
@@ -231,4 +231,3 @@ Estos documentos y límites no existen todavía: pertenecen a fases posteriores 
 han generado en esta fase.
 
 - **Audio (códigos P8SCII)**: el código de control `\A` del Apéndice A reproduce datos de SFX (velocidad, bucle, notas, instrumento, volumen, efecto) desde `print`; pertenece a gráficos/apéndice, no se documenta en la fase audio.
-- **Registro de estado compartido `0x5f36`**: el bitfield se documenta por dominio: fuera de rango de PGET (`0x5f5b`) y SGET (`0x5f59`) en las APIs gráficas, scroll de texto de PRINT (`0x40`) en herramientas; el resto de flags de mapa/memoria ya está cubierto en `mget`, `map` y `tline`.
