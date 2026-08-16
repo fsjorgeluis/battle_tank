@@ -2,3 +2,11 @@
 .opencode/.DS_Store
 *.app
 .*p8
+
+# --- Bloqueo de Seguridad para herramientas de OpenCode ---
+# Ignora absolutamente todo el entorno local autogenerado de la extensión
+.opencode/node_modules/
+.opencode/package.json
+.opencode/package-lock.json
+.opencode/bun.lock
+.opencode/.gitignore
