@@ -20,6 +20,11 @@ ingesta o consultar una fuente autorizada.
 1. Lee `knowledge/index.md`.
 2. Identifica los documentos pertinentes y léelos completos. Sólo carga los que
    guardan relación con el cambio: por ejemplo entrada, gráficos, mapa o límites.
+   Al leer cada documento, revisa su campo `relationships` y abre también los
+   documentos enlazados (`related`, `related-api`) si son relevantes para la
+   tarea, aunque pertenezcan a otro dominio del índice. Las relaciones son
+   bidireccionales por convención, pero no se recorren automáticamente: es
+   responsabilidad del agente seguirlas.
 3. Verifica que cada documento usado tenga `status: verified`. Si es `ambiguous`
    o `needs-review`, detén la decisión dependiente y decláralo como bloqueo.
 4. Consulta las restricciones aplicables antes de escribir diseño o código.

@@ -20,6 +20,8 @@ relationships:
     target: "pico8.constraint.audio-channels"
   - type: "related"
     target: "pico8.constraint.sound-instruments"
+  - type: "related-api"
+    target: "pico8.api.print"
 claims:
   - id: "pico8.api.sfx.claim.1"
     statement: "SFX(N, [CHANNEL], [OFFSET], [LENGTH]) reproduce el SFX N en el canal CHANNEL desde la nota OFFSET (0..31 en notas) durante LENGTH notas."

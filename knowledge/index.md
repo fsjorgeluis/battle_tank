@@ -224,10 +224,3 @@ Mapa de recuperación de la base generada desde `sources/pico8-manual-v0.2.7.htm
 | `pico8.concept.include-directive` | concept | `#INCLUDE` inyecta código en el arranque | verified | `knowledge/concepts/include-directive.md` |
 | `pico8.concept.export-tools` | concept | EXPORT/IMPORT: formatos inferidos por extensión | verified | `knowledge/concepts/export-tools.md` |
 | `pico8.concept.audio-editors` | concept | Editores de SFX (2.4) y música (2.5) | verified | `knowledge/concepts/audio-editors.md` |
-
-## Pendiente (dominios no procesados en las fases foundation, graphics, audio, map-memory, data-math y system-tools)
-
-Estos documentos y límites no existen todavía: pertenecen a fases posteriores y no se
-han generado en esta fase.
-
-- **Audio (códigos P8SCII)**: el código de control `\A` del Apéndice A reproduce datos de SFX (velocidad, bucle, notas, instrumento, volumen, efecto) desde `print`; pertenece a gráficos/apéndice, no se documenta en la fase audio.
