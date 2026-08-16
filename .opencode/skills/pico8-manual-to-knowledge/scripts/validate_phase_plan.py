@@ -7,7 +7,7 @@ import argparse
 import difflib
 import json
 import re
-import sys
+# import sys
 from pathlib import Path, PurePosixPath
 from typing import Any
 

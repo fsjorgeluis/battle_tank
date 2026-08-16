@@ -23,6 +23,18 @@ Mapa de recuperación de la base generada desde `sources/pico8-manual-v0.2.7.htm
 | `pico8.constraint.sprite-sheet-size` | constraint | Hoja de sprites de 128x128 píxeles | verified | `knowledge/constraints/sprite-sheet-size.md` |
 | `pico8.constraint.audio-channels` | constraint | Bus de audio de 4 canales fijos | verified | `knowledge/constraints/audio-channels.md` |
 | `pico8.constraint.sound-instruments` | constraint | 64 definiciones de sonido (sfx) | verified | `knowledge/constraints/sound-instruments.md` |
+| `pico8.constraint.map-size` | constraint | Cuadrícula de mapa por defecto de 128x32 tiles | verified | `knowledge/constraints/map-size.md` |
+| `pico8.constraint.map-shared-size` | constraint | Mapa de 128x64 tiles con memoria compartida | verified | `knowledge/constraints/map-shared-size.md` |
+| `pico8.constraint.map-cell-width` | constraint | Celda de mapa de 8 bits (1 byte por tile) | verified | `knowledge/constraints/map-cell-width.md` |
+| `pico8.constraint.tline-fraction-bits` | constraint | 13 bits fraccionarios por defecto en TLINE | verified | `knowledge/constraints/tline-fraction-bits.md` |
+| `pico8.constraint.ram-size` | constraint | RAM base de 64k | verified | `knowledge/constraints/ram-size.md` |
+| `pico8.constraint.cart-rom-size` | constraint | Cart ROM de 32k | verified | `knowledge/constraints/cart-rom-size.md` |
+| `pico8.constraint.lua-ram-size` | constraint | Lua RAM de 2MB | verified | `knowledge/constraints/lua-ram-size.md` |
+| `pico8.constraint.persistent-cart-data-size` | constraint | 256 bytes de datos persistentes de cartucho | verified | `knowledge/constraints/persistent-cart-data-size.md` |
+| `pico8.constraint.screen-buffer-size` | constraint | Buffer de pantalla de 8k en 0x6000 | verified | `knowledge/constraints/screen-buffer-size.md` |
+| `pico8.constraint.peek-result-max` | constraint | PEEK devuelve como máximo 8192 resultados | verified | `knowledge/constraints/peek-result-max.md` |
+| `pico8.constraint.poke-values-max` | constraint | POKE escribe como máximo 8192 valores | verified | `knowledge/constraints/poke-values-max.md` |
+| `pico8.constraint.cart-write-session-limit` | constraint | CSTORE escribe hasta 64 cartuchos por sesión | verified | `knowledge/constraints/cart-write-session-limit.md` |
 
 ## Ciclo de juego
 
@@ -76,17 +88,34 @@ Mapa de recuperación de la base generada desde `sources/pico8-manual-v0.2.7.htm
 | `pico8.api.sfx` | api | Reproducir SFX con canal, offset y longitud | verified | `knowledge/api-audio/sfx.md` |
 | `pico8.api.music` | api | Reproducir música con fundido y máscara de canales | verified | `knowledge/api-audio/music.md` |
 
-## Pendiente (dominios no procesados en las fases foundation, graphics y audio)
+## Mapa y memoria
+
+| ID | Tipo | Resumen | Estado | Ruta |
+| --- | --- | --- | --- | --- |
+| `pico8.api.mget` | api | Obtener valor del mapa en (x, y) | verified | `knowledge/api-map/mget.md` |
+| `pico8.api.mset` | api | Fijar valor del mapa en (x, y) | verified | `knowledge/api-map/mset.md` |
+| `pico8.api.map` | api | Dibujar sección del mapa con capas | verified | `knowledge/api-map/map.md` |
+| `pico8.api.tline` | api | Línea texturizada muestreando el mapa | verified | `knowledge/api-map/tline.md` |
+| `pico8.api.peek` | api | Leer byte(s) de la RAM base | verified | `knowledge/api-memory/peek.md` |
+| `pico8.api.poke` | api | Escribir byte(s) en la RAM base | verified | `knowledge/api-memory/poke.md` |
+| `pico8.api.peek2` | api | Leer número de 16 bits (little-endian) | verified | `knowledge/api-memory/peek2.md` |
+| `pico8.api.poke2` | api | Escribir número de 16 bits (little-endian) | verified | `knowledge/api-memory/poke2.md` |
+| `pico8.api.peek4` | api | Leer número de 32 bits (little-endian) | verified | `knowledge/api-memory/peek4.md` |
+| `pico8.api.poke4` | api | Escribir número de 32 bits (little-endian) | verified | `knowledge/api-memory/poke4.md` |
+| `pico8.api.memcpy` | api | Copiar LEN bytes dentro de la RAM base | verified | `knowledge/api-memory/memcpy.md` |
+| `pico8.api.memset` | api | Rellenar memoria con un valor de 8 bits | verified | `knowledge/api-memory/memset.md` |
+| `pico8.api.reload` | api | Copiar de cart ROM a RAM base | verified | `knowledge/api-memory/reload.md` |
+| `pico8.api.cstore` | api | Copiar de RAM base a cart ROM | verified | `knowledge/api-memory/cstore.md` |
+
+## Pendiente (dominios no procesados en las fases foundation, graphics, audio y map-memory)
 
 Estos documentos y límites no existen todavía: pertenecen a fases posteriores y no se
 han generado en esta fase.
 
-- **Mapa/memoria**: tilemap 128x32 (+128x32 compartido); superposición sprite/mapa; secciones 6.6 y 6.7.
 - **Audio (estado en tiempo real)**: `stat()` expone el estado del mezclador de audio (valores 16..26 legados y 46..56 actuales: canales 0..3, nota, patrón, ticks); sección 6.1, fase system-tools.
 - **Audio (códigos P8SCII)**: el código de control `\A` del Apéndice A reproduce datos de SFX (velocidad, bucle, notas, instrumento, volumen, efecto) desde `print`; pertenece a gráficos/apéndice, no se documenta en la fase audio.
 - **Audio (editores)**: el editor de SFX (2.4) y el de música (2.5) describen instrumentos, efectos, filtros y formas de onda; herramientas, fase system-tools.
-- **Datos/cartucho**: límite de 32k de datos del cartucho; sección 6.11.
+- **Datos/cartucho**: límite de 32k de datos del cartucho y detalle de 'Cartridge Data'; sección 6.11. El tamaño de la cart ROM (32k) ya se documenta desde 6.7 (`pico8.constraint.cart-rom-size`); esta fase aporta el contrato de escritura y persistencia.
 - **Directiva `#INCLUDE`**: documentada en la sección 5 pero sin ruta `api` autorizada en foundation.
-- **Contratos completos de `stat()` y `poke()`**: sólo se citan hechos parciales en `pico8.concept.devkit-input`; dominios system y memory.
-- **APIs `map()` y `tline()`**: citadas en 6.2 (transparencia de `palt` y máscaras de `fget`) pero su contrato completo pertenece al dominio de mapa (sección 6.6).
-- **Soporte de las APIs gráficas vía `poke`**: la configuración de scroll (`0x5f36`) y valores fuera de rango (`0x5f5b`, `0x5f59`) depende del contrato de memoria (sección 6.7).
+- **Contratos completos de `stat()` y `cartdata()`**: sólo se citan hechos parciales en `pico8.concept.devkit-input`; dominios system y data. El contrato completo de `poke()` ya se documenta en `pico8.api.poke` (fase map-memory).
+- **Registro de estado compartido `0x5f36`**: el bitfield se documenta por dominio: fuera de rango de PGET (`0x5f5b`) y SGET (`0x5f59`) en las APIs gráficas, scroll de texto de PRINT (`0x40`) en herramientas; el resto de flags de mapa/memoria ya está cubierto en `mget`, `map` y `tline`.
