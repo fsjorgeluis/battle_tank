@@ -35,6 +35,8 @@ Mapa de recuperación de la base generada desde `sources/pico8-manual-v0.2.7.htm
 | `pico8.constraint.peek-result-max` | constraint | PEEK devuelve como máximo 8192 resultados | verified | `knowledge/constraints/peek-result-max.md` |
 | `pico8.constraint.poke-values-max` | constraint | POKE escribe como máximo 8192 valores | verified | `knowledge/constraints/poke-values-max.md` |
 | `pico8.constraint.cart-write-session-limit` | constraint | CSTORE escribe hasta 64 cartuchos por sesión | verified | `knowledge/constraints/cart-write-session-limit.md` |
+| `pico8.constraint.cartdata-number-count` | constraint | Un slot CARTDATA almacena 64 números (256 bytes) | verified | `knowledge/constraints/cartdata-number-count.md` |
+| `pico8.constraint.cartdata-id-length` | constraint | ID de CARTDATA de hasta 64 caracteres (a..z, 0..9, _) | verified | `knowledge/constraints/cartdata-id-length.md` |
 
 ## Ciclo de juego
 
@@ -107,7 +109,65 @@ Mapa de recuperación de la base generada desde `sources/pico8-manual-v0.2.7.htm
 | `pico8.api.reload` | api | Copiar de cart ROM a RAM base | verified | `knowledge/api-memory/reload.md` |
 | `pico8.api.cstore` | api | Copiar de RAM base a cart ROM | verified | `knowledge/api-memory/cstore.md` |
 
-## Pendiente (dominios no procesados en las fases foundation, graphics, audio y map-memory)
+## Tablas (6.3)
+
+| ID | Tipo | Resumen | Estado | Ruta |
+| --- | --- | --- | --- | --- |
+| `pico8.api.add` | api | Añadir valor al final de la tabla o insertar en posición | verified | `knowledge/api-tables/add.md` |
+| `pico8.api.del` | api | Eliminar la primera instancia de un valor | verified | `knowledge/api-tables/del.md` |
+| `pico8.api.deli` | api | Eliminar por índice; sin índice, el último | verified | `knowledge/api-tables/deli.md` |
+| `pico8.api.count` | api | Longitud de la tabla o conteo de instancias | verified | `knowledge/api-tables/count.md` |
+| `pico8.api.all` | api | Iterar elementos en orden de inserción | verified | `knowledge/api-tables/all.md` |
+| `pico8.api.foreach` | api | Aplicar función a cada elemento | verified | `knowledge/api-tables/foreach.md` |
+| `pico8.api.pairs` | api | Iterar clave/valor sin restricción de indexación | verified | `knowledge/api-tables/pairs.md` |
+
+## Matemáticas (6.8)
+
+| ID | Tipo | Resumen | Estado | Ruta |
+| --- | --- | --- | --- | --- |
+| `pico8.api.max` | api | Máximo de dos valores | verified | `knowledge/api-math/max.md` |
+| `pico8.api.min` | api | Mínimo de dos valores | verified | `knowledge/api-math/min.md` |
+| `pico8.api.mid` | api | Valor del medio de tres | verified | `knowledge/api-math/mid.md` |
+| `pico8.api.flr` | api | Suelo de un número | verified | `knowledge/api-math/flr.md` |
+| `pico8.api.ceil` | api | Techo de un número | verified | `knowledge/api-math/ceil.md` |
+| `pico8.api.cos` | api | Coseno con 1.0 = vuelta completa | verified | `knowledge/api-math/cos.md` |
+| `pico8.api.sin` | api | Seno invertido para espacio de pantalla | verified | `knowledge/api-math/sin.md` |
+| `pico8.api.atan2` | api | Vector a ángulo de 0..1 en pantalla | verified | `knowledge/api-math/atan2.md` |
+| `pico8.api.sqrt` | api | Raíz cuadrada | verified | `knowledge/api-math/sqrt.md` |
+| `pico8.api.abs` | api | Valor absoluto | verified | `knowledge/api-math/abs.md` |
+| `pico8.api.rnd` | api | Aleatorio en [0, X) o elemento aleatorio | verified | `knowledge/api-math/rnd.md` |
+| `pico8.api.srand` | api | Fijar semilla aleatoria | verified | `knowledge/api-math/srand.md` |
+| `pico8.api.band` | api | AND a nivel de bits (operador &) | verified | `knowledge/api-math/band.md` |
+| `pico8.api.bor` | api | OR a nivel de bits (operador \|) | verified | `knowledge/api-math/bor.md` |
+| `pico8.api.bxor` | api | XOR a nivel de bits (operador ^^) | verified | `knowledge/api-math/bxor.md` |
+| `pico8.api.bnot` | api | NOT a nivel de bits (operador ~) | verified | `knowledge/api-math/bnot.md` |
+| `pico8.api.shl` | api | Desplazamiento a la izquierda (operador <<) | verified | `knowledge/api-math/shl.md` |
+| `pico8.api.shr` | api | Desplazamiento aritmético a la derecha (operador >>) | verified | `knowledge/api-math/shr.md` |
+| `pico8.api.lshr` | api | Desplazamiento lógico a la derecha (operador >>>) | verified | `knowledge/api-math/lshr.md` |
+| `pico8.api.rotl` | api | Rotación a la izquierda (operador <<>) | verified | `knowledge/api-math/rotl.md` |
+| `pico8.api.rotr` | api | Rotación a la derecha (operador >><) | verified | `knowledge/api-math/rotr.md` |
+
+## Strings (6.10)
+
+| ID | Tipo | Resumen | Estado | Ruta |
+| --- | --- | --- | --- | --- |
+| `pico8.api.tostr` | api | Convertir a string con flags de formato | verified | `knowledge/api-strings/tostr.md` |
+| `pico8.api.tonum` | api | Convertir a número con flags de formato | verified | `knowledge/api-strings/tonum.md` |
+| `pico8.api.chr` | api | Códigos ordinales a string | verified | `knowledge/api-strings/chr.md` |
+| `pico8.api.ord` | api | Caracteres a códigos ordinales 0..255 | verified | `knowledge/api-strings/ord.md` |
+| `pico8.api.sub` | api | Substring por posiciones | verified | `knowledge/api-strings/sub.md` |
+| `pico8.api.split` | api | Dividir string en tabla | verified | `knowledge/api-strings/split.md` |
+| `pico8.api.type` | api | Tipo de un valor como string | verified | `knowledge/api-strings/type.md` |
+
+## Datos (6.11)
+
+| ID | Tipo | Resumen | Estado | Ruta |
+| --- | --- | --- | --- | --- |
+| `pico8.api.cartdata` | api | Abrir slot de almacenamiento permanente | verified | `knowledge/api-data/cartdata.md` |
+| `pico8.api.dget` | api | Leer número (0..63) del slot | verified | `knowledge/api-data/dget.md` |
+| `pico8.api.dset` | api | Escribir número (0..63) en el slot | verified | `knowledge/api-data/dset.md` |
+
+## Pendiente (dominios no procesados en las fases foundation, graphics, audio, map-memory y data-math)
 
 Estos documentos y límites no existen todavía: pertenecen a fases posteriores y no se
 han generado en esta fase.
@@ -115,7 +175,6 @@ han generado en esta fase.
 - **Audio (estado en tiempo real)**: `stat()` expone el estado del mezclador de audio (valores 16..26 legados y 46..56 actuales: canales 0..3, nota, patrón, ticks); sección 6.1, fase system-tools.
 - **Audio (códigos P8SCII)**: el código de control `\A` del Apéndice A reproduce datos de SFX (velocidad, bucle, notas, instrumento, volumen, efecto) desde `print`; pertenece a gráficos/apéndice, no se documenta en la fase audio.
 - **Audio (editores)**: el editor de SFX (2.4) y el de música (2.5) describen instrumentos, efectos, filtros y formas de onda; herramientas, fase system-tools.
-- **Datos/cartucho**: límite de 32k de datos del cartucho y detalle de 'Cartridge Data'; sección 6.11. El tamaño de la cart ROM (32k) ya se documenta desde 6.7 (`pico8.constraint.cart-rom-size`); esta fase aporta el contrato de escritura y persistencia.
-- **Directiva `#INCLUDE`**: documentada en la sección 5 pero sin ruta `api` autorizada en foundation.
-- **Contratos completos de `stat()` y `cartdata()`**: sólo se citan hechos parciales en `pico8.concept.devkit-input`; dominios system y data. El contrato completo de `poke()` ya se documenta en `pico8.api.poke` (fase map-memory).
+- **Contratos completos de `stat()`**: sólo se citan hechos parciales en `pico8.concept.devkit-input`; dominio system, fase system-tools.
+- **Directiva `#INCLUDE`**: documentada en la sección 5; se documentará en la fase system-tools (herramientas).
 - **Registro de estado compartido `0x5f36`**: el bitfield se documenta por dominio: fuera de rango de PGET (`0x5f5b`) y SGET (`0x5f59`) en las APIs gráficas, scroll de texto de PRINT (`0x40`) en herramientas; el resto de flags de mapa/memoria ya está cubierto en `mget`, `map` y `tline`.
