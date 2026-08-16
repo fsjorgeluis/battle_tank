@@ -1,32 +1,155 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+# Contexto del proyecto. Se inyecta en TODOS los artefactos generados.
+context: |
+  # Proyecto
+  Videojuego para PICO-8 (cartucho .p8). Repositorio greenfield:
+  no existe código de juego todavía; todo el desarrollo sigue el flujo OpenSpec
+  y el skill `pico8-development`.
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+  # Plataforma y stack
+  - Plataforma: PICO-8 v0.2.7 (fantasy console, juego por software).
+  - Lenguaje: P8 Lua (variante restringida de Lua; sin librerías estándar, sin
+    entorno, números de 16.16 de precisión fija).
+  - Sin frameworks ni librerías de terceros: sprites, mapa, SFX y música se
+    editan en los editores integrados del propio PICO-8.
+  - Ejecución y verificación: binario `pico8` en el host (macOS).
+  - Herramientas de import/export de contenido: EXPORT/IMPORT
+    (pico8.concept.export-tools).
 
-# Per-operation guidance (optional)
-# Add advisory guidance for how apply and archive work should be conducted.
-# This is separate from artifact rules above.
-# Example:
-#   operations:
-#     apply:
-#       guidance:
-#         - Keep test summaries concise
-#     archive:
-#       guidance:
-#         - Summarize the archive outcome before finishing
+  # Autoridad de conocimiento (contrato del skill pico8-development)
+  - Para CUALQUIER decisión específica de PICO-8 la autoridad es `knowledge/`,
+    generada desde `sources/pico8-manual-v0.2.7.html` por el skill
+    `pico8-manual-to-knowledge`. No inventar APIs, firmas, límites ni efectos.
+  - Índice obligatorio: leer `knowledge/index.md` antes de modificar código.
+  - Solo usar documentos con `status: verified`. Si es `ambiguous` o
+    `needs-review`, declararlo como bloqueo y detener la decisión dependiente.
+  - Referenciar IDs de conocimiento (`pico8.api.*`, `pico8.constraint.*`,
+    `pico8.concept.*`) en comentarios técnicos y artefactos; nunca afirmaciones
+    sin fuente.
+  - No modificar `knowledge/` ni `sources/` durante tareas de desarrollo: si
+    falta información, reportar el hueco y ejecutar el skill de ingesta.
+  - Para cada cambio funcional, recorrer las relaciones (`related`,
+    `related-api`) de los documentos consultados.
+
+  # Restricciones de plataforma PICO-8 (todas `verified` en knowledge/constraints/)
+  ## Código y almacenamiento
+  - Máximo 8192 tokens de código (pico8.constraint.token-limit); aplica también
+    al resultado de concatenar tabs e #INCLUDE.
+  - Cart ROM de 32k (pico8.constraint.cart-rom-size); RAM base de 64k
+    (pico8.constraint.ram-size); Lua RAM de 2MB (pico8.constraint.lua-ram-size).
+  ## CPU y bucle de juego
+  - 4M instrucciones VM/s (pico8.constraint.cpu-throughput): a 30fps hay
+    ~133k instrucciones por frame de presupuesto.
+  - Bucle `_init`/`_update`/`_draw` a 30fps; `_update60` cambia a 60fps con la
+    mitad de CPU por frame; si `_draw` no cabe, cae a 15fps llamando `_update`
+    dos veces por frame visible (pico8.concept.game-loop). No asumir que el
+    host alcanza 60fps: el juego debe ser jugable a 30 y 15fps.
+  - Carga de CPU observable con stat(1) al final de cada frame o medidor CTRL-P.
+  ## Números
+  - Rango ~-32768..32767.99999 con paso mínimo ~0.00002
+    (pico8.constraint.number-min/max, pico8.constraint.number-precision).
+  ## Pantalla y arte
+  - Resolución fija 128x128 píxeles (pico8.constraint.display-resolution).
+  - Paleta fija de 16 colores (pico8.constraint.palette-color-count).
+  - Sprites de 8x8 en hoja de 128x128 (pico8.constraint.sprite-size,
+    pico8.constraint.sprite-sheet-size); 128 sprites dedicados y 128
+    compartidos con el mapa (pico8.constraint.sprite-count,
+    pico8.constraint.sprite-shared-count).
+  ## Mapa
+  - Cuadrícula por defecto de 128x32 tiles; 128x64 con memoria compartida;
+    1 byte por tile (pico8.constraint.map-size, map-shared-size,
+    map-cell-width).
+  ## Audio
+  - Bus de 4 canales fijos (pico8.constraint.audio-channels); 64 definiciones
+    de sonido (pico8.constraint.sound-instruments).
+  ## Entrada
+  - 6 botones por controlador (pico8.constraint.controller-button-count);
+    `btnp` se resetea al inicio de cada `_update`/`_update60`.
+  ## Persistencia
+  - Datos persistentes limitados a 256 bytes por slot CARTDATA = 64 números
+    (pico8.constraint.persistent-cart-data-size,
+    pico8.constraint.cartdata-number-count); ID del slot hasta 64 caracteres
+    a..z, 0..9, _ (pico8.constraint.cartdata-id-length).
+
+  # Patrones arquitectónicos
+  - Bucle dirigido por la plataforma: definir `_init`, `_update` y `_draw`
+    (o `_update60`); no usar bucle manual salvo necesidad justificada.
+  - Modularización por dominio mediante `#INCLUDE`
+    (pico8.concept.include-directive): separar arranque, estado global,
+    actualización y render en tabs por responsabilidad.
+  - Separar lógica (update) de presentación (draw); el estado del juego vive en
+    tablas Lua, nunca en variables globales dispersas.
+  - Máquina de estados para el flujo del juego (menú, partida, pausa, game over)
+    con un estado global mínimo y transiciones explícitas; cubrir reinicio de
+    cartucho y cambio de estado en los criterios de aceptación.
+  - Iterar colecciones con `all`/`foreach` (orden de inserción) y `pairs`
+    cuando el índice no importa; evitar bucles por índice costosos.
+  - Precomputar fuera del frame: caminos, rutas de enemigos, tablas de
+    balance y datos de oleadas se calculan en `_init` o por oleada.
+  - Presupuestar recursos por cambio: tokens, CPU/frame, sprites, tiles de
+    mapa, canales de audio y slots cartdata.
+  - Audio: reservar canales `sfx`/`music` por evento; definir qué canal usa
+    cada tipo de sonido antes de implementar.
+
+  # Convenciones
+  - Idioma de la documentación y artefactos: español.
+  - Nombres de funciones globales del juego con prefijo de módulo
+    (p.ej. `td_init_waves`, `td_update_enemies`).
+  - Constantes semánticas en MAYÚSCULAS (colores, estados, configuración de
+    oleadas); variables locales en snake_case.
+  - Minimizar estado global: solo el mínimo compartido, agrupado en tablas.
+  - No usar emojis en código ni comentarios.
+  - Commits en formato conventional commits (feat/fix/refactor/docs), como en
+    el historial existente.
+  - No ampliar funcionalidad más allá de lo solicitado; el conocimiento es la
+    autoridad, no la suposición.
+
+  # Estrategia de testing
+  - No existe framework de tests en el cartucho: la validación es por ejecución
+    en PICO-8 contra los criterios de aceptación del cambio.
+  - Lógica pura (balance, daño, rutas, oleadas) aislada en funciones puras,
+    verificables con `assert` en consola o ejecución dirigida, sin mezclarse
+    con render.
+  - Al cerrar cada cambio: ejecutar el cartucho, comprobar casos normal, de
+    borde y de regresión, y verificar presupuestos (tokens con `info`, CPU con
+    stat(1)/CTRL-P).
+  - Cada cambio OpenSpec define su propia estrategia de pruebas: casos normal,
+    bordes y regresión, con criterios reproducibles.
+
+  # Referencias
+  - Fuente autorizada: `sources/pico8-manual-v0.2.7.html`.
+  - Índice de conocimiento: `knowledge/index.md`.
+  - Skill de desarrollo: `.opencode/skills/pico8-development/` (contrato de
+    autoridad y flujo OpenSpec obligatorio).
+  - Checklist de aprobación: `.opencode/skills/pico8-development/references/openspec-checklist.md`.
+
+# Reglas por artefacto del schema `spec-driven`
+rules:
+  proposal:
+    - "Describir el objetivo jugable y el comportamiento observable, no los mecanismos internos."
+    - "Listar los IDs de conocimiento verificados (`pico8.api.*`, `pico8.constraint.*`) que sustentan cada API o límite usado."
+    - "Indicar el presupuesto afectado: tokens, ROM, sprites, mapa, memoria, CPU/frame, canales de audio o entrada."
+  specs:
+    - "Definir criterios de aceptación reproducibles: entrada, estado interno y representación visible en pantalla."
+    - "Cubrir límites, reinicio de cartucho y transición de estados."
+    - "Separar incertidumbres y decisiones derivadas de los hechos documentados."
+  design:
+    - "Referenciar IDs de conocimiento verificados; no afirmaciones sin fuente."
+    - "Incluir presupuestos previstos: tokens y CPU por frame."
+    - "Mantener el diseño dentro de las restricciones de plataforma listadas en el contexto."
+  tasks:
+    - "Descomponer en unidades verificables de forma independiente en PICO-8."
+    - "Incluir pasos de ejecución del cartucho y verificación de los criterios de aceptación y presupuestos."
+
+# Guidance para operaciones apply y archive
+operations:
+  apply:
+    guidance:
+      - Verificar cada criterio de aceptación ejecutando el cartucho en PICO-8 cuando el entorno lo permita.
+      - Confirmar presupuestos (tokens con `info`, CPU con stat(1)/CTRL-P) antes de dar por cerrada una tarea.
+      - No implementar una API o comportamiento hasta que el cambio tenga criterios de aceptación comprobables.
+  archive:
+    guidance:
+      - Resumir el resultado del cambio y las restricciones de plataforma comprobadas.
+      - Anotar los IDs de conocimiento verificados utilizados y las incertidumbres que quedaron pendientes.
