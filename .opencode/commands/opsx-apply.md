@@ -1,5 +1,6 @@
 ---
 description: "Implement tasks from an OpenSpec change (Experimental)"
+agent: opsx-apply
 ---
 
 Implement tasks from an OpenSpec change.

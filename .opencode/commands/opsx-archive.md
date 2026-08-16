@@ -1,5 +1,6 @@
 ---
 description: "Archive a completed change in the experimental workflow"
+agent: opsx-archive
 ---
 
 Archive a completed change in the experimental workflow.
