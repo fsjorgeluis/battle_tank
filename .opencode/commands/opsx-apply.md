@@ -73,6 +73,21 @@ Implement tasks from an OpenSpec change.
    Do not copy `context` or `operationGuidance` verbatim into implementation
    files or planning artifacts unless the user separately asks for that content.
 
+   **Load applicable project skills**
+   
+   Before implementing tasks, inspect the available skills and load any skill
+   that is directly applicable to the project or technology being modified.
+   
+   For each applicable skill:
+   
+   - Load the skill before modifying implementation files.
+   - Treat its instructions as additional implementation constraints.
+   - Follow its required knowledge, validation, testing, and execution procedures.
+   - If the skill identifies a blocker, stop and report it instead of bypassing it.
+
+   Do not assume that a skill has been applied merely because it exists in the
+   project. It must be explicitly loaded before implementation.
+
 5. **Show current progress**
 
    Display:
