@@ -21,6 +21,8 @@ Mapa de recuperación de la base generada desde `sources/pico8-manual-v0.2.7.htm
 | `pico8.constraint.sprite-shared-count` | constraint | 128 sprites compartidos con el mapa | verified | `knowledge/constraints/sprite-shared-count.md` |
 | `pico8.constraint.sprite-size` | constraint | Sprite de 8x8 píxeles | verified | `knowledge/constraints/sprite-size.md` |
 | `pico8.constraint.sprite-sheet-size` | constraint | Hoja de sprites de 128x128 píxeles | verified | `knowledge/constraints/sprite-sheet-size.md` |
+| `pico8.constraint.audio-channels` | constraint | Bus de audio de 4 canales fijos | verified | `knowledge/constraints/audio-channels.md` |
+| `pico8.constraint.sound-instruments` | constraint | 64 definiciones de sonido (sfx) | verified | `knowledge/constraints/sound-instruments.md` |
 
 ## Ciclo de juego
 
@@ -67,13 +69,22 @@ Mapa de recuperación de la base generada desde `sources/pico8-manual-v0.2.7.htm
 | `pico8.api.sspr` | api | Estirar región de la hoja de sprites | verified | `knowledge/api-graphics/sspr.md` |
 | `pico8.api.fillp` | api | Patrón de relleno 4x4 de 2 colores | verified | `knowledge/api-graphics/fillp.md` |
 
-## Pendiente (dominios no procesados en las fases foundation y graphics)
+## Audio
+
+| ID | Tipo | Resumen | Estado | Ruta |
+| --- | --- | --- | --- | --- |
+| `pico8.api.sfx` | api | Reproducir SFX con canal, offset y longitud | verified | `knowledge/api-audio/sfx.md` |
+| `pico8.api.music` | api | Reproducir música con fundido y máscara de canales | verified | `knowledge/api-audio/music.md` |
+
+## Pendiente (dominios no procesados en las fases foundation, graphics y audio)
 
 Estos documentos y límites no existen todavía: pertenecen a fases posteriores y no se
 han generado en esta fase.
 
 - **Mapa/memoria**: tilemap 128x32 (+128x32 compartido); superposición sprite/mapa; secciones 6.6 y 6.7.
-- **Audio**: 4 canales y 64 instrumentos definibles; sección 6.5.
+- **Audio (estado en tiempo real)**: `stat()` expone el estado del mezclador de audio (valores 16..26 legados y 46..56 actuales: canales 0..3, nota, patrón, ticks); sección 6.1, fase system-tools.
+- **Audio (códigos P8SCII)**: el código de control `\A` del Apéndice A reproduce datos de SFX (velocidad, bucle, notas, instrumento, volumen, efecto) desde `print`; pertenece a gráficos/apéndice, no se documenta en la fase audio.
+- **Audio (editores)**: el editor de SFX (2.4) y el de música (2.5) describen instrumentos, efectos, filtros y formas de onda; herramientas, fase system-tools.
 - **Datos/cartucho**: límite de 32k de datos del cartucho; sección 6.11.
 - **Directiva `#INCLUDE`**: documentada en la sección 5 pero sin ruta `api` autorizada en foundation.
 - **Contratos completos de `stat()` y `poke()`**: sólo se citan hechos parciales en `pico8.concept.devkit-input`; dominios system y memory.
