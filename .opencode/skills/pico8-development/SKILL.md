@@ -64,6 +64,28 @@ aceptación comprobables.
 - Si surge una API que no está en `knowledge/`, no la supongas. Registra el hueco
   y vuelve al skill de ingesta.
 
+## Entorno de ejecución
+
+Para ejecutar y verificar un cartucho, el agente debe comprobar que
+el ejecutable de PICO-8 está disponible en el entorno de ejecución.
+
+La presencia del archivo `.p8` no implica que PICO-8 esté instalado.
+
+Antes de ejecutar el cartucho:
+
+1. Verificar que el ejecutable de PICO-8 está disponible y puede ser
+   invocado desde el entorno de ejecución de OpenCode.
+2. Verificar que puede invocarse desde la terminal.
+3. Ejecutar el cartucho desde el directorio raíz del proyecto para
+   preservar las rutas relativas utilizadas por `#INCLUDE`.
+4. Si PICO-8 no está disponible, no intentar ejecutar el cartucho
+   mediante Lua estándar.
+5. Declarar la verificación de ejecución como bloqueada y continuar
+   únicamente con las verificaciones que puedan realizarse sin PICO-8.
+6. No inventar comandos, argumentos o rutas de PICO-8; cualquier
+   procedimiento específico debe estar respaldado por conocimiento
+   verificado o una fuente autorizada.
+
 ## Cierre
 
 1. Ejecuta las pruebas disponibles y el cartucho en PICO-8 cuando el entorno lo

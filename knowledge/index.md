@@ -37,12 +37,27 @@ Mapa de recuperación de la base generada desde `sources/pico8-manual-v0.2.7.htm
 | `pico8.constraint.cart-write-session-limit` | constraint | CSTORE escribe hasta 64 cartuchos por sesión | verified | `knowledge/constraints/cart-write-session-limit.md` |
 | `pico8.constraint.cartdata-number-count` | constraint | Un slot CARTDATA almacena 64 números (256 bytes) | verified | `knowledge/constraints/cartdata-number-count.md` |
 | `pico8.constraint.cartdata-id-length` | constraint | ID de CARTDATA de hasta 64 caracteres (a..z, 0..9, _) | verified | `knowledge/constraints/cartdata-id-length.md` |
+| `pico8.constraint.code-compressed-size-max` | constraint | Código comprimido menor a 15360 bytes en .p8.png/.p8.rom | verified | `knowledge/constraints/code-compressed-size-max.md` |
 
 ## Ciclo de juego
 
 | ID | Tipo | Resumen | Estado | Ruta |
 | --- | --- | --- | --- | --- |
 | `pico8.concept.game-loop` | concept | Bucle `_init`/`_update`/`_draw` y modos 30/60/15fps | verified | `knowledge/concepts/game-loop.md` |
+
+## Lenguaje y sintaxis
+
+| ID | Tipo | Resumen | Estado | Ruta |
+| --- | --- | --- | --- | --- |
+| `pico8.concept.lua-syntax-primer` | concept | Sintaxis Lua sin biblioteca estándar; números 16:16, arrays 1-based, atajos | verified | `knowledge/concepts/lua-syntax-primer.md` |
+| `pico8.concept.p8-quirks` | concept | Gotchas: spritesheet/mapa compartido, precisión numérica, sin/cos 0..1, sgn(0)=1 | verified | `knowledge/concepts/p8-quirks.md` |
+
+## Sistema de archivos, CLI y configuración
+
+| ID | Tipo | Resumen | Estado | Ruta |
+| --- | --- | --- | --- | --- |
+| `pico8.concept.file-system` | concept | Drive virtual: LS/CD/MKDIR/FOLDER, rutas por SO y cloud drive | verified | `knowledge/concepts/file-system.md` |
+| `pico8.concept.commandline-parameters` | concept | Switches de línea de comandos y su precedencia sobre config.txt | verified | `knowledge/concepts/commandline-parameters.md` |
 
 ## Entrada
 
@@ -108,6 +123,14 @@ Mapa de recuperación de la base generada desde `sources/pico8-manual-v0.2.7.htm
 | `pico8.api.memset` | api | Rellenar memoria con un valor de 8 bits | verified | `knowledge/api-memory/memset.md` |
 | `pico8.api.reload` | api | Copiar de cart ROM a RAM base | verified | `knowledge/api-memory/reload.md` |
 | `pico8.api.cstore` | api | Copiar de RAM base a cart ROM | verified | `knowledge/api-memory/cstore.md` |
+| `pico8.concept.memory-layout` | concept | Layout de Base RAM 64k y sus regiones (GFX a 0x0, SCREEN 0x6000, custom font 0x5600) | verified | `knowledge/concepts/memory-layout.md` |
+| `pico8.concept.memory-remapping` | concept | Remapeo de GFX/MAP/SCREEN vía 0x5f54..0x5f57 | verified | `knowledge/concepts/memory-remapping.md` |
+
+## P8SCII
+
+| ID | Tipo | Resumen | Estado | Ruta |
+| --- | --- | --- | --- | --- |
+| `pico8.concept.p8scii` | concept | Códigos de control CHR(0)..CHR(15), comandos especiales, fuente personalizada | verified | `knowledge/concepts/p8scii.md` |
 
 ## Tablas (6.3)
 
@@ -224,3 +247,17 @@ Mapa de recuperación de la base generada desde `sources/pico8-manual-v0.2.7.htm
 | `pico8.concept.include-directive` | concept | `#INCLUDE` inyecta código en el arranque | verified | `knowledge/concepts/include-directive.md` |
 | `pico8.concept.export-tools` | concept | EXPORT/IMPORT: formatos inferidos por extensión | verified | `knowledge/concepts/export-tools.md` |
 | `pico8.concept.audio-editors` | concept | Editores de SFX (2.4) y música (2.5) | verified | `knowledge/concepts/audio-editors.md` |
+
+## Pendientes
+
+Esta sección registra áreas del manual que han sido identificadas como
+relevantes pero que todavía no están representadas como conocimiento
+verificado dentro de `knowledge/`.
+
+Los elementos pendientes:
+
+- no constituyen conocimiento `verified`;
+- no autorizan al agente a inventar APIs, comandos, argumentos, rutas o
+  comportamientos;
+- sirven para orientar futuras ejecuciones de `pico8-manual-to-knowledge`;
+- deben tratarse como `knowledge gap` cuando una tarea dependa de ellos. (Ninguna entrada pendiente en esta revisión: ver `pico8.concept.commandline-parameters` para los parámetros de CLI.)

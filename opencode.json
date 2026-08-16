@@ -5,7 +5,7 @@
       "description": "Explores and analyzes an OpenSpec change without implementing application code.",
       "mode": "subagent",
       "hidden": true,
-      "model": "opencode/deepseek-v4-flash",
+      "model": "opencode/deepseek-v4-flash-free",
     },
     "opsx-apply": {
       "description": "Implements an OpenSpec change in the codebase.",
