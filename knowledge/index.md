@@ -167,14 +167,68 @@ Mapa de recuperación de la base generada desde `sources/pico8-manual-v0.2.7.htm
 | `pico8.api.dget` | api | Leer número (0..63) del slot | verified | `knowledge/api-data/dget.md` |
 | `pico8.api.dset` | api | Escribir número (0..63) en el slot | verified | `knowledge/api-data/dset.md` |
 
-## Pendiente (dominios no procesados en las fases foundation, graphics, audio, map-memory y data-math)
+## Sistema (6.1)
+
+| ID | Tipo | Resumen | Estado | Ruta |
+| --- | --- | --- | --- | --- |
+| `pico8.api.load` | api | Cargar cartucho, reemplazando RAM, código y editor | verified | `knowledge/api-system/load.md` |
+| `pico8.api.save` | api | Guardar el cartucho actual en disco | verified | `knowledge/api-system/save.md` |
+| `pico8.api.folder` | api | Abrir la carpeta de cartuchos del sistema | verified | `knowledge/api-system/folder.md` |
+| `pico8.api.ls` | api | Listar los cartuchos del sistema | verified | `knowledge/api-system/ls.md` |
+| `pico8.api.run` | api | Empezar a ejecutar el cartucho | verified | `knowledge/api-system/run.md` |
+| `pico8.api.stop` | api | Detener la ejecución del cartucho | verified | `knowledge/api-system/stop.md` |
+| `pico8.api.resume` | api | Reanudar la ejecución detenida del cartucho | verified | `knowledge/api-system/resume.md` |
+| `pico8.api.assert` | api | Falla la ejecución si la condición es falsa | verified | `knowledge/api-system/assert.md` |
+| `pico8.api.reboot` | api | Reiniciar el cartucho y volver a ejecutar `_init` | verified | `knowledge/api-system/reboot.md` |
+| `pico8.api.reset` | api | Recargar el cartucho desde disco | verified | `knowledge/api-system/reset.md` |
+| `pico8.api.info` | api | Información del cartucho: autor, título, versión | verified | `knowledge/api-system/info.md` |
+| `pico8.api.flip` | api | Actualizar la pantalla y esperar el fin del frame | verified | `knowledge/api-system/flip.md` |
+| `pico8.api.printh` | api | Imprimir en la consola del host | verified | `knowledge/api-system/printh.md` |
+| `pico8.api.time` | api | Tiempo de ejecución en segundos (1/30 con `_update60`) | verified | `knowledge/api-system/time.md` |
+| `pico8.api.stat` | api | Valores de estado del sistema (índices discretos) | verified | `knowledge/api-system/stat.md` |
+| `pico8.api.extcmd` | api | Comandos a la plataforma host (guardado, audio) | verified | `knowledge/api-system/extcmd.md` |
+
+## Menú (6.9)
+
+| ID | Tipo | Resumen | Estado | Ruta |
+| --- | --- | --- | --- | --- |
+| `pico8.api.menuitem` | api | Añadir item al menú del sistema con callback | verified | `knowledge/api-menu/menuitem.md` |
+
+## GPIO (6.12)
+
+| ID | Tipo | Resumen | Estado | Ruta |
+| --- | --- | --- | --- | --- |
+| `pico8.api.serial` | api | Enviar/recibir bytes por canal GPIO o bytestream | ambiguous | `knowledge/api-gpio/serial.md` |
+| `pico8.concept.gpio` | concept | Pines 0x5f80..0x5fff mapeados al host | verified | `knowledge/concepts/gpio.md` |
+
+## Lua (6.14)
+
+| ID | Tipo | Resumen | Estado | Ruta |
+| --- | --- | --- | --- | --- |
+| `pico8.api.setmetatable` | api | Fijar la metatabla de una tabla | verified | `knowledge/api-lua/setmetatable.md` |
+| `pico8.api.getmetatable` | api | Obtener la metatabla actual de una tabla | verified | `knowledge/api-lua/getmetatable.md` |
+| `pico8.api.rawset` | api | Escritura cruda en la tabla sin metamétodos | verified | `knowledge/api-lua/rawset.md` |
+| `pico8.api.rawget` | api | Lectura cruda de la tabla sin metamétodos | verified | `knowledge/api-lua/rawget.md` |
+| `pico8.api.rawequal` | api | Comparación cruda de tablas sin `__eq` | verified | `knowledge/api-lua/rawequal.md` |
+| `pico8.api.rawlen` | api | Longitud cruda de la tabla sin `__len` | verified | `knowledge/api-lua/rawlen.md` |
+| `pico8.api.select` | api | Argumentos variables: sublista o conteo con `"#"` | verified | `knowledge/api-lua/select.md` |
+| `pico8.api.cocreate` | api | Crear corrutina para una función | verified | `knowledge/api-lua/cocreate.md` |
+| `pico8.api.coresume` | api | Ejecutar/continuar corrutina; errores no detienen | verified | `knowledge/api-lua/coresume.md` |
+| `pico8.api.costatus` | api | Estado de corrutina: running, suspended, dead | verified | `knowledge/api-lua/costatus.md` |
+| `pico8.api.yield` | api | Suspender la corrutina y devolver el control | verified | `knowledge/api-lua/yield.md` |
+
+## Herramientas
+
+| ID | Tipo | Resumen | Estado | Ruta |
+| --- | --- | --- | --- | --- |
+| `pico8.concept.include-directive` | concept | `#INCLUDE` inyecta código en el arranque | verified | `knowledge/concepts/include-directive.md` |
+| `pico8.concept.export-tools` | concept | EXPORT/IMPORT: formatos inferidos por extensión | verified | `knowledge/concepts/export-tools.md` |
+| `pico8.concept.audio-editors` | concept | Editores de SFX (2.4) y música (2.5) | verified | `knowledge/concepts/audio-editors.md` |
+
+## Pendiente (dominios no procesados en las fases foundation, graphics, audio, map-memory, data-math y system-tools)
 
 Estos documentos y límites no existen todavía: pertenecen a fases posteriores y no se
 han generado en esta fase.
 
-- **Audio (estado en tiempo real)**: `stat()` expone el estado del mezclador de audio (valores 16..26 legados y 46..56 actuales: canales 0..3, nota, patrón, ticks); sección 6.1, fase system-tools.
 - **Audio (códigos P8SCII)**: el código de control `\A` del Apéndice A reproduce datos de SFX (velocidad, bucle, notas, instrumento, volumen, efecto) desde `print`; pertenece a gráficos/apéndice, no se documenta en la fase audio.
-- **Audio (editores)**: el editor de SFX (2.4) y el de música (2.5) describen instrumentos, efectos, filtros y formas de onda; herramientas, fase system-tools.
-- **Contratos completos de `stat()`**: sólo se citan hechos parciales en `pico8.concept.devkit-input`; dominio system, fase system-tools.
-- **Directiva `#INCLUDE`**: documentada en la sección 5; se documentará en la fase system-tools (herramientas).
 - **Registro de estado compartido `0x5f36`**: el bitfield se documenta por dominio: fuera de rango de PGET (`0x5f5b`) y SGET (`0x5f59`) en las APIs gráficas, scroll de texto de PRINT (`0x40`) en herramientas; el resto de flags de mapa/memoria ya está cubierto en `mget`, `map` y `tline`.

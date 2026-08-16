@@ -77,7 +77,8 @@ El control estándar son los 6 botones. Ratón y teclado son un modo opt-in expe
 ## Documentos relacionados
 
 - `pico8.api.btn` — botones del controlador y bitfield; los botones de ratón pueden mapearse a `btn(4..6)`.
-- Pendientes: contrato completo de `stat()` (dominio system) y de `poke()` (dominio memory).
+- `pico8.api.stat` — contrato completo de `stat()` (dominio system); este concepto aporta los valores 30..39 (6.13), que `stat.md` no duplica.
+- Pendiente: contrato completo de `poke()` (dominio memory).
 
 ## Ambigüedades
 
