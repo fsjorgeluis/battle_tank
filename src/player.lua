@@ -108,11 +108,9 @@ function pl_draw()
   end
  end
 
- -- sprite del cuerpo por sector
- -- pico8.api.spr, pico8.api.fget
- local sector=ut_snap_sector(pl.body_a)
- local spr_id,fx,fy=ut_sprite_for_sector(sector)
- spr(spr_id,pl.x-SPR_SIZE/2,pl.y-SPR_SIZE/2,1,1,fx,fy)
+ -- sprite del cuerpo
+ -- pico8.api.spr
+ spr(SPR_PLAYER,pl.x-SPR_SIZE/2,pl.y-SPR_SIZE/2)
 
  -- cañon con line() hacia turret_a
  -- pico8.api.line
