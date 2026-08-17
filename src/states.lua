@@ -6,7 +6,7 @@ gs={state=GS_MENU,game=nil}
 
 function st_init()
  gs.state=GS_MENU
- gs.game={menu_sel=1,hits=0}
+ gs.game={menu_sel=1,hits=0,score=0}
 end
 
 function st_set_state(newstate)
@@ -16,6 +16,8 @@ end
 function st_reset()
  pl_init()
  en_init()
+ bl_init()
+ gs.game.score=0
  gs.state=GS_PLAY
 end
 
@@ -63,6 +65,11 @@ end
 function st_update_play()
  pl_update()
  en_update()
+ bl_update()
+ -- disparo con X (btnp(5))
+ if btnp(5) then
+  bl_fire(pl.x,pl.y,pl.turret_a)
+ end
  -- comprobar gameover
  if pl.lifes<=0 then
   st_set_state(GS_GAMEOVER)
