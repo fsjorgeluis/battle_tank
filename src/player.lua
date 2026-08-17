@@ -66,33 +66,31 @@ function pl_update()
  pl.x=pl.x+dx
  pl.y=pl.y+dy
 
- -- colision solida con enemigo (antes de clamp de arena)
+ -- colision solida con enemigos (antes de clamp de arena)
  local px1=pl.x-COLLISION_INSET
  local py1=pl.y-COLLISION_INSET
  local px2=pl.x+COLLISION_INSET
  local py2=pl.y+COLLISION_INSET
- local ex1=en.x-SPR_SIZE/2
- local ey1=en.y-SPR_SIZE/2
- local ex2=en.x+SPR_SIZE/2
- local ey2=en.y+SPR_SIZE/2
-
- -- deteccion de contacto (ANTES de colision solida)
- if t()>pl.invuln_until then
-  local fx1=pl.x-COLLISION_INSET
-  local fy1=pl.y-COLLISION_INSET
-  local fx2=pl.x+COLLISION_INSET
-  local fy2=pl.y+COLLISION_INSET
-  if ut_aabb_overlap(fx1,fy1,fx2,fy2,ex1,ey1,ex2,ey2) then
-   gs.game.hits=gs.game.hits+1
-   pl.lifes=pl.lifes-1
-   pl.invuln_until=t()+INVULN_TIME
+ local hit_enemy=false
+ for e in all(enemies) do
+  local ex1=e.x-SPR_SIZE/2
+  local ey1=e.y-SPR_SIZE/2
+  local ex2=e.x+SPR_SIZE/2
+  local ey2=e.y+SPR_SIZE/2
+  -- deteccion de contacto (ANTES de colision solida)
+  if t()>pl.invuln_until and not hit_enemy then
+   if ut_aabb_overlap(px1,py1,px2,py2,ex1,ey1,ex2,ey2) then
+    gs.game.hits=gs.game.hits+1
+    pl.lifes=pl.lifes-1
+    pl.invuln_until=t()+INVULN_TIME
+    hit_enemy=true
+   end
   end
- end
-
- -- colision solida (empuja jugador hacia atras)
- if ut_aabb_overlap(px1,py1,px2,py2,ex1,ey1,ex2,ey2) then
-  pl.x=pl.prev_x
-  pl.y=pl.prev_y
+  -- colision solida (empuja jugador hacia atras)
+  if ut_aabb_overlap(px1,py1,px2,py2,ex1,ey1,ex2,ey2) then
+   pl.x=pl.prev_x
+   pl.y=pl.prev_y
+  end
  end
 
  -- clamp a arena 128x128

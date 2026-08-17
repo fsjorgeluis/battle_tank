@@ -6,12 +6,14 @@ __lua__
 #include src/states.lua
 #include src/player.lua
 #include src/enemy.lua
+#include src/bullet.lua
 #include src/ui.lua
 
 function _init()
  st_init()
  pl_init()
  en_init()
+ bl_init()
 end
 
 function _update()

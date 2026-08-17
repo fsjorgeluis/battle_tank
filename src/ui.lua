@@ -22,10 +22,11 @@ function ui_draw_play()
  cls(COL_BG)
  en_draw()
  pl_draw()
+ bl_draw()
  ui_draw_hud()
 end
 
--- HUD: corazones y toques
+-- HUD: corazones, toques y puntos
 function ui_draw_hud()
  -- pico8.api.spr
  for i=1,pl.lifes do
@@ -33,6 +34,7 @@ function ui_draw_hud()
  end
  color(COL_TEXT)
  print("toques:"..gs.game.hits,60,1)
+ print("puntos:"..gs.game.score,60,9)
 end
 
 -- game over
@@ -40,6 +42,7 @@ function ui_draw_gameover()
  cls(COL_BG)
  color(COL_TEXT)
  print("game over",40,40,COL_RED)
- print("toques recibidos: "..gs.game.hits,20,60,COL_TEXT)
+ print("toques recibidos: "..gs.game.hits,20,55,COL_TEXT)
+ print("puntos: "..gs.game.score,20,65,COL_TEXT)
  print("x para reintentar",24,80,COL_GREY)
 end

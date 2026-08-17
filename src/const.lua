@@ -48,3 +48,20 @@ COLLISION_INSET=2
 
 -- tamano de cañon
 BARREL_LEN=6
+
+-- disparo
+BULLET_SPEED=4
+BULLET_SIZE=2
+BULLET_LIFE=2.0
+FIRE_COOLDOWN=0.35
+KILL_POINTS=100
+RESPAWN_TIME=2.0
+BULLET_COL=10
+
+-- zonas de respawn enemigo
+ENEMY_ZONES={
+ {x=104,y=32},
+ {x=32,y=104},
+ {x=104,y=104},
+ {x=32,y=32}
+}
