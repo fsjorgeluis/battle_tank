@@ -21,6 +21,7 @@ end
 function ui_draw_play()
  cls(COL_BG)
  en_draw()
+ fx_draw()
  pl_draw()
  bl_draw()
  ui_draw_hud()

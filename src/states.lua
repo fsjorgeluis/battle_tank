@@ -17,6 +17,7 @@ function st_reset()
  pl_init()
  en_init()
  bl_init()
+ fx_init()
  gs.game.score=0
  gs.state=GS_PLAY
 end
@@ -66,6 +67,7 @@ function st_update_play()
  pl_update()
  en_update()
  bl_update()
+ fx_update()
  -- disparo con X (btnp(5))
  if btnp(5) then
   bl_fire(pl.x,pl.y,pl.turret_a)

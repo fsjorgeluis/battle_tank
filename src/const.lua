@@ -58,6 +58,28 @@ KILL_POINTS=100
 RESPAWN_TIME=2.0
 BULLET_COL=10
 
+-- vida enemiga
+ENEMY_HP=3
+ENEMY_FLASH_TIME=0.07
+-- tintes de dano: re-mapeo de colores 6/7 segun vida restante
+ENEMY_TINTS={
+ [3]={6,6,7,7},  -- original: gris/blanco
+ [2]={6,10,7,9}, -- amarillo/naranja
+ [1]={6,9,7,8}   -- naranja/rojo
+}
+
+-- retroceso
+RECOIL_IMPULSE=0.35
+RECOIL_FRICTION=0.7
+
+-- sfx
+SFX_SHOT=1
+CH_SHOT=1
+SFX_BOOM=0
+CH_BOOM=0
+SFX_HIT=2
+CH_HIT=2
+
 -- zonas de respawn enemigo
 ENEMY_ZONES={
  {x=104,y=32},

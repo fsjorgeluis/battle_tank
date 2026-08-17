@@ -16,6 +16,9 @@ function pl_init()
  pl.invuln_until=0
  pl.prev_x=pl.x
  pl.prev_y=pl.y
+ pl.rx=0
+ pl.ry=0
+ pl.muzzle_until=0
 end
 
 function pl_update()
@@ -65,6 +68,12 @@ function pl_update()
  local dy=sin(pl.body_a)*pl.speed
  pl.x=pl.x+dx
  pl.y=pl.y+dy
+
+ -- integrar retroceso
+ pl.rx=pl.rx*RECOIL_FRICTION
+ pl.ry=pl.ry*RECOIL_FRICTION
+ pl.x=pl.x+pl.rx
+ pl.y=pl.y+pl.ry
 
  -- colision solida con enemigos (antes de clamp de arena)
  local px1=pl.x-COLLISION_INSET
@@ -117,4 +126,9 @@ function pl_draw()
  local bx=pl.x+cos(pl.turret_a)*BARREL_LEN
  local by=pl.y+sin(pl.turret_a)*BARREL_LEN
  line(pl.x,pl.y,bx,by,COL_DKGREY)
+
+ -- fogonazo: pixel brillante en la punta del canon
+ if t()<pl.muzzle_until then
+  rectfill(bx-0.5,by-0.5,bx+0.5,by+0.5,9)
+ end
 end
