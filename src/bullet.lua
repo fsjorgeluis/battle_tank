@@ -14,9 +14,16 @@ end
 function bl_fire(x,y,a)
  if t()<bl.cooldown_until then return end
  bl.cooldown_until=t()+FIRE_COOLDOWN
- local bx=x+cos(a)*BARREL_LEN
- local by=y+sin(a)*BARREL_LEN
- add(bullets,{x=bx,y=by,vx=cos(a)*BULLET_SPEED,vy=sin(a)*BULLET_SPEED,born=t()})
+ local dir=a
+ local m=MUZZLE[dir]
+ local bx=x+m[1]
+ local by=y+m[2]
+ add(bullets,{x=bx,y=by,vx=cos(dir)*BULLET_SPEED,vy=sin(dir)*BULLET_SPEED,born=t()})
+ -- retroceso opuesto a body_a
+ pl.rx=-cos(dir)*RECOIL_IMPULSE
+ pl.ry=-sin(dir)*RECOIL_IMPULSE
+ pl.muzzle_until=t()+0.07
+ sfx(SFX_SHOT,CH_SHOT)
 end
 
 function bl_update()
@@ -43,7 +50,15 @@ function bl_update()
     local ex2=e.x+SPR_SIZE/2
     local ey2=e.y+SPR_SIZE/2
     if ut_aabb_overlap(bx1,by1,bx2,by2,ex1,ey1,ex2,ey2) then
-     en_kill(e)
+     fx_hit(e.x,e.y)
+     local died=en_hit(e)
+     if not died then
+      sfx(SFX_HIT,CH_HIT)
+     else
+      en_kill(e)
+      fx_explode(e.x,e.y)
+      sfx(SFX_BOOM,CH_BOOM)
+     end
      hit=true
      break
     end

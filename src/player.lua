@@ -1,7 +1,7 @@
 -- player.lua
--- Update/draw del tanque del jugador
+-- Update/draw del tanque del jugador (modelo 4-direcciones)
 -- pico8.api.cos, pico8.api.sin, pico8.api.btn, pico8.api.time,
--- pico8.api.spr, pico8.api.line, pico8.api.fget
+-- pico8.api.spr, pico8.api.circfill
 -- pico8.constraint.display-resolution
 
 pl={}
@@ -10,54 +10,39 @@ function pl_init()
  pl.x=PLAYER_X
  pl.y=PLAYER_Y
  pl.body_a=0
- pl.turret_a=0
  pl.speed=0
  pl.lifes=INITIAL_LIFES
  pl.invuln_until=0
  pl.prev_x=pl.x
  pl.prev_y=pl.y
+ pl.rx=0
+ pl.ry=0
+ pl.muzzle_until=0
+ pl.motor_last_offset=-1
 end
 
 function pl_update()
  pl.prev_x=pl.x
  pl.prev_y=pl.y
 
- -- rotacion: btn(0)=izq, btn(1)=der
+ -- direccion: flechas → angulo + aceleracion
+ -- prioridad: primera flecha detectada gana
  -- pico8.api.btn
- if not btn(4) then
-  -- modo normal: rotar cuerpo
-  if btn(0) then
-   pl.body_a=pl.body_a-ROT_SPEED
-  end
-  if btn(1) then
-   pl.body_a=pl.body_a+ROT_SPEED
-  end
-  -- cañon sigue al cuerpo
-  pl.turret_a=pl.body_a
- else
-  -- modo apuntado: rotar solo cañon
-  if btn(0) then
-   pl.turret_a=pl.turret_a-ROT_SPEED
-  end
-  if btn(1) then
-   pl.turret_a=pl.turret_a+ROT_SPEED
-  end
+ local dir=nil
+ if btn(0) then dir=0.5    -- izquierda
+ elseif btn(1) then dir=0   -- derecha
+ elseif btn(2) then dir=0.25 -- arriba
+ elseif btn(3) then dir=0.75 -- abajo
  end
 
- -- movimiento: btn(2)=adelante, btn(3)=atras
- -- solo en modo normal (sin btn(4))
- if not btn(4) then
-  if btn(2) then
-   pl.speed=pl.speed+SPEED_ACCEL
-  end
-  if btn(3) then
-   pl.speed=pl.speed-SPEED_ACCEL
-  end
-  -- friccion
+ if dir then
+  pl.body_a=dir
+  pl.speed=pl.speed+SPEED_ACCEL
+ else
+  -- sin tecla: friccion
   pl.speed=pl.speed*SPEED_FRICTION
-  -- clamp
-  pl.speed=ut_clamp(pl.speed,-SPEED_MAX,SPEED_MAX)
  end
+ pl.speed=ut_clamp(pl.speed,0,SPEED_MAX)
 
  -- integrar movimiento
  -- pico8.api.cos, pico8.api.sin
@@ -65,6 +50,26 @@ function pl_update()
  local dy=sin(pl.body_a)*pl.speed
  pl.x=pl.x+dx
  pl.y=pl.y+dy
+
+ -- integrar retroceso
+ pl.rx=pl.rx*RECOIL_FRICTION
+ pl.ry=pl.ry*RECOIL_FRICTION
+ pl.x=pl.x+pl.rx
+ pl.y=pl.y+pl.ry
+
+ -- motor continuo: tono segun pl.speed (sin tick)
+ -- pico8.api.sfx.claim.1, pico8.api.sfx.claim.6
+ if pl.speed>ENGINE_FLOOR then
+  local norm=pl.speed/SPEED_MAX
+  local offset=MOTOR_OFF_MIN+flr(norm*MOTOR_SWEEP/MOTOR_STEP)*MOTOR_STEP
+  if offset~=pl.motor_last_offset then
+   sfx(SFX_MOTOR,CH_MOTOR,offset)
+   pl.motor_last_offset=offset
+  end
+ elseif pl.motor_last_offset>=0 then
+  sfx(-1,CH_MOTOR)
+  pl.motor_last_offset=-1
+ end
 
  -- colision solida con enemigos (antes de clamp de arena)
  local px1=pl.x-COLLISION_INSET
@@ -97,6 +102,10 @@ function pl_update()
  -- pico8.constraint.display-resolution
  pl.x=ut_clamp(pl.x,SPR_SIZE/2,127-SPR_SIZE/2)
  pl.y=ut_clamp(pl.y,SPR_SIZE/2,127-SPR_SIZE/2)
+
+ -- emitir rastro de orugas segun velocidad real
+ -- pico8.concept.game-loop
+ tr_emit(pl.x,pl.y,pl.body_a,pl.speed)
 end
 
 function pl_draw()
@@ -108,13 +117,30 @@ function pl_draw()
   end
  end
 
- -- sprite del cuerpo
+ -- sprite del cuerpo con flip segun body_a
  -- pico8.api.spr
- spr(SPR_PLAYER,pl.x-SPR_SIZE/2,pl.y-SPR_SIZE/2)
+ local sx=pl.x-SPR_SIZE/2
+ local sy=pl.y-SPR_SIZE/2
+ if pl.body_a==0.25 then
+  -- arriba: sprite 0 sin flip
+  spr(0,sx,sy)
+ elseif pl.body_a==0.75 then
+  -- abajo: sprite 0 con flip_y
+  spr(0,sx,sy,1,1,false,true)
+ elseif pl.body_a==0.5 then
+  -- izquierda: sprite 1 sin flip
+  spr(SPR_PLAYER_FLAT,sx,sy)
+ else
+  -- derecha (body_a==0): sprite 1 con flip_x
+  spr(SPR_PLAYER_FLAT,sx,sy,1,1,true,false)
+ end
 
- -- cañon con line() hacia turret_a
- -- pico8.api.line
- local bx=pl.x+cos(pl.turret_a)*BARREL_LEN
- local by=pl.y+sin(pl.turret_a)*BARREL_LEN
- line(pl.x,pl.y,bx,by,COL_DKGREY)
+ -- fogonazo: punta del canon con tabla MUZZLE
+ -- pico8.api.circfill
+ if t()<pl.muzzle_until then
+  local m=MUZZLE[pl.body_a]
+  if m then
+   circfill(pl.x+m[1],pl.y+m[2],1,10)
+  end
+ end
 end

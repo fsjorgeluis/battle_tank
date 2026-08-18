@@ -20,7 +20,6 @@ COL_DKGREY=5
 SPEED_MAX=1.5
 SPEED_ACCEL=0.15
 SPEED_FRICTION=0.9
-ROT_SPEED=0.03
 
 -- invulnerabilidad
 BLINK_HZ=8
@@ -31,6 +30,7 @@ INITIAL_LIFES=3
 
 -- sprites (indices en la hoja)
 SPR_PLAYER=0
+SPR_PLAYER_FLAT=1
 SPR_ENEMY=4
 SPR_HEART=8
 
@@ -46,9 +46,6 @@ SPR_SIZE=8
 -- inset de colision del jugador (perdon al jugador)
 COLLISION_INSET=2
 
--- tamano de cañon
-BARREL_LEN=6
-
 -- disparo
 BULLET_SPEED=4
 BULLET_SIZE=2
@@ -57,6 +54,39 @@ FIRE_COOLDOWN=0.35
 KILL_POINTS=100
 RESPAWN_TIME=2.0
 BULLET_COL=10
+
+-- offsets de fogonazo por body_a (desde centro del tanque)
+MUZZLE={[0]={3,0},[0.25]={0,-3.5},[0.5]={-3,0},[0.75]={0,3.5}}
+
+-- vida enemiga
+ENEMY_HP=3
+ENEMY_FLASH_TIME=0.07
+-- tintes de dano: re-mapeo de colores 6/7 segun vida restante
+ENEMY_TINTS={
+ [3]={6,6,7,7},  -- original: gris/blanco
+ [2]={6,10,7,9}, -- amarillo/naranja
+ [1]={6,9,7,8}   -- naranja/rojo
+}
+
+-- retroceso
+RECOIL_IMPULSE=0.35
+RECOIL_FRICTION=0.7
+
+-- sfx
+SFX_SHOT=1
+CH_SHOT=1
+SFX_BOOM=0
+CH_BOOM=0
+SFX_HIT=2
+CH_HIT=2
+SFX_MOTOR=3
+CH_MOTOR=3
+
+-- motor continuo (pico8.constraint.audio-channels, pico8.constraint.sound-instruments)
+ENGINE_FLOOR=0.03   -- umbral de arranque/parada
+MOTOR_SWEEP=12      -- notas de barrido tonal (8..16)
+MOTOR_OFF_MIN=0     -- offset minimo del barrido
+MOTOR_STEP=3        -- cuantizacion del tono (evita crepitidos)
 
 -- zonas de respawn enemigo
 ENEMY_ZONES={
