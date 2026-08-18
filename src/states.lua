@@ -77,6 +77,7 @@ function st_update_play()
  end
  -- comprobar gameover
  if pl.lifes<=0 then
+  sfx(-1,CH_MOTOR)
   st_set_state(GS_GAMEOVER)
  end
 end

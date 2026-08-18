@@ -82,6 +82,12 @@ CH_HIT=2
 SFX_MOTOR=3
 CH_MOTOR=3
 
+-- motor continuo (pico8.constraint.audio-channels, pico8.constraint.sound-instruments)
+ENGINE_FLOOR=0.03   -- umbral de arranque/parada
+MOTOR_SWEEP=12      -- notas de barrido tonal (8..16)
+MOTOR_OFF_MIN=0     -- offset minimo del barrido
+MOTOR_STEP=3        -- cuantizacion del tono (evita crepitidos)
+
 -- zonas de respawn enemigo
 ENEMY_ZONES={
  {x=104,y=32},

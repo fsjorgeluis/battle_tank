@@ -18,7 +18,7 @@ function pl_init()
  pl.rx=0
  pl.ry=0
  pl.muzzle_until=0
- pl.motor_on=false
+ pl.motor_last_offset=-1
 end
 
 function pl_update()
@@ -57,14 +57,18 @@ function pl_update()
  pl.x=pl.x+pl.rx
  pl.y=pl.y+pl.ry
 
- -- motor: deteccion de flanco
- -- pico8.api.sfx
- if pl.speed>=0.15 and not pl.motor_on then
-  sfx(SFX_MOTOR,CH_MOTOR)
-  pl.motor_on=true
- elseif pl.speed<0.15 and pl.motor_on then
+ -- motor continuo: tono segun pl.speed (sin tick)
+ -- pico8.api.sfx.claim.1, pico8.api.sfx.claim.6
+ if pl.speed>ENGINE_FLOOR then
+  local norm=pl.speed/SPEED_MAX
+  local offset=MOTOR_OFF_MIN+flr(norm*MOTOR_SWEEP/MOTOR_STEP)*MOTOR_STEP
+  if offset~=pl.motor_last_offset then
+   sfx(SFX_MOTOR,CH_MOTOR,offset)
+   pl.motor_last_offset=offset
+  end
+ elseif pl.motor_last_offset>=0 then
   sfx(-1,CH_MOTOR)
-  pl.motor_on=false
+  pl.motor_last_offset=-1
  end
 
  -- colision solida con enemigos (antes de clamp de arena)
