@@ -20,6 +20,7 @@ end
 -- HUD en partida
 function ui_draw_play()
  cls(COL_BG)
+ tr_draw()
  en_draw()
  fx_draw()
  pl_draw()

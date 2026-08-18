@@ -98,6 +98,10 @@ function pl_update()
  -- pico8.constraint.display-resolution
  pl.x=ut_clamp(pl.x,SPR_SIZE/2,127-SPR_SIZE/2)
  pl.y=ut_clamp(pl.y,SPR_SIZE/2,127-SPR_SIZE/2)
+
+ -- emitir rastro de orugas segun velocidad real
+ -- pico8.concept.game-loop
+ tr_emit(pl.x,pl.y,pl.body_a,pl.speed)
 end
 
 function pl_draw()

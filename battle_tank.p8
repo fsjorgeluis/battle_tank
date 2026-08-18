@@ -3,6 +3,7 @@ version 43
 __lua__
 #include src/const.lua
 #include src/util.lua
+#include src/track.lua
 #include src/states.lua
 #include src/player.lua
 #include src/enemy.lua
@@ -12,6 +13,7 @@ __lua__
 
 function _init()
  st_init()
+ tr_init()
  pl_init()
  en_init()
  bl_init()
