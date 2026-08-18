@@ -18,6 +18,7 @@ function st_reset()
  en_init()
  bl_init()
  fx_init()
+ sfx(-1,CH_MOTOR)
  gs.game.score=0
  gs.state=GS_PLAY
 end

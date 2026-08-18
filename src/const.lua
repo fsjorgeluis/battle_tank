@@ -79,6 +79,8 @@ SFX_BOOM=0
 CH_BOOM=0
 SFX_HIT=2
 CH_HIT=2
+SFX_MOTOR=3
+CH_MOTOR=3
 
 -- zonas de respawn enemigo
 ENEMY_ZONES={

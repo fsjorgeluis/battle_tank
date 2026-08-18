@@ -64,6 +64,26 @@ Disparar SHALL reproducir el sonido de disparo y la muerte de un enemigo SHALL r
 - **WHEN** una bala impacta en un enemigo que sobrevive al golpe
 - **THEN** se reproduce el sonido de impacto del golpe en su canal reservado
 
+### Requirement: Retumbo de motor al desplazarse
+El tanque del jugador SHALL reproducir un sonido de motor grave y tenue en bucle mientras se desplaza por la arena. El sonido SHALL ser un zumbido bajo y suave (wave noise, pitch bajo, vol 1) que comunique movimiento sin molestar ni opacar disparo/explosión/golpe. El sonido SHALL iniciarse al comienzo del movimiento (transición de reposo a velocidad, umbral `abs(speed) >= 0.15`) y detenerse cuando la velocidad caiga por debajo del mismo umbral (`abs(speed) < 0.15`). Los umbrales de inicio y parada SHALL ser simétricos para evitar oscillaciones de start/stop. El umbral de 0.15 equivale a 1 frame de aceleración (SPEED_ACCEL) y garantiza que el SFX permanezca en el canal asignado. El sonido SHALL reproducirse solo en estado `GS_PLAY` y no en menú ni en modo apuntado (btn(4)).
+
+#### Scenario: Motor suena al moverse
+- **WHEN** el jugador se desplaza con las flechas en estado `GS_PLAY` y `abs(speed) >= 0.15`
+- **THEN** se reproduce un zumbido grave y tenue (vol 1) en loop en el canal del motor
+- **THEN** el sonido es lo suficientemente bajo para no opacar disparo, golpe ni explosión
+
+#### Scenario: Motor se detiene al quedarse quieto
+- **WHEN** el tanque deja de recibir input de movimiento y su velocidad cae por debajo del umbral (`abs(speed) < 0.15`)
+- **THEN** el retumbo de motor se detiene inmediatamente
+
+#### Scenario: Motor no suena en menú ni en modo apuntado
+- **WHEN** el jugador está en menú o mantiene btn(4) con el cañón desalineado
+- **THEN** no se reproduce el retumbo de motor, aunque se pulse una tecla de dirección
+
+#### Scenario: Motor se silencia al reiniciar partida
+- **WHEN** se reinicia la partida (tras game over o desde menú)
+- **THEN** el retumbo de motor se detiene inmediatamente si estaba sonando
+
 ### Requirement: Efectos restablecidos al reiniciar la partida
 Al reiniciar una partida (tanto desde menú como tras game over), SHALL desaparecer cualquier efecto en curso y no SHALL quedar chispas, explosiones, fogonazos ni retrocesos pendientes.
 

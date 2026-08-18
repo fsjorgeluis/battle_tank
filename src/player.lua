@@ -19,6 +19,7 @@ function pl_init()
  pl.rx=0
  pl.ry=0
  pl.muzzle_until=0
+ pl.motor_on=false
 end
 
 function pl_update()
@@ -74,6 +75,16 @@ function pl_update()
  pl.ry=pl.ry*RECOIL_FRICTION
  pl.x=pl.x+pl.rx
  pl.y=pl.y+pl.ry
+
+ -- motor: deteccion de flanco
+ -- pico8.api.sfx
+ if abs(pl.speed)>=0.15 and not pl.motor_on then
+  sfx(SFX_MOTOR,CH_MOTOR)
+  pl.motor_on=true
+ elseif abs(pl.speed)<0.15 and pl.motor_on then
+  sfx(-1,CH_MOTOR)
+  pl.motor_on=false
+ end
 
  -- colision solida con enemigos (antes de clamp de arena)
  local px1=pl.x-COLLISION_INSET

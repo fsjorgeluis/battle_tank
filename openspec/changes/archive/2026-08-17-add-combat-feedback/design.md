@@ -14,6 +14,7 @@ La colisión sólida y el daño por contacto del jugador ya existen (`src/player
 - Retroceso físico del tanque al disparar, integrado por las colisiones existentes, con la posibilidad real de daño por contacto si se retrocede contra un enemigo (decisión de diseño asumida: riesgo asumido).
 - Fogonazo de 2 frames en la boca del cañón.
 - SFX de disparo y de explosión con canales reservados.
+- Retumbo de motor en bucle mientras el tanque se desplaza (canal 3).
 
 **Non-Goals:**
 
@@ -81,19 +82,58 @@ Con `RECOIL_IMPULSE=0.35` y `RECOIL_FRICTION=0.7` el desplazamiento total es ~1.
 | --- | --- | --- |
 | Disparo | 1 | 1 |
 | Explosión de muerte | 0 | 0 |
-| (Reservado futura música) | - | 2-3 |
+| Golpe intermedio | 2 | 2 |
+| Motor (loop) | 3 | 3 |
 
 ### D6. Nuevo `#include` y tope de tokens
 
-`battle_tank.p8` añade `#include src/fx.lua`. Presupuesto previsto: ~180-250 tokens nuevos (el módulo fx ~90-120, el resto repartido) sobre el tope `pico8.constraint.token-limit` de 8192. Sin uso significativo de ROM/RAM; 0 sprites nuevos; 2 de 64 SFX y 2 de 4 canales.
+`battle_tank.p8` añade `#include src/fx.lua`. Presupuesto previsto: ~180-250 tokens nuevos (el módulo fx ~90-120, el resto repartido) sobre el tope `pico8.constraint.token-limit` de 8192. Sin uso significativo de ROM/RAM; 0 sprites nuevos; 3 de 64 SFX y 4 de 4 canales.
+
+### D7. Retumbo de motor en canal 3
+
+El tanque del jugador emite un sonido de motor en bucle mientras se desplaza. SFX slot 3 en `__sfx__` autorizado con notas graves (instrumento bajo o ruido) y rango de bucle (`loop_start < loop_end`) para que repita indefinidamente. Reproducción en canal 3 con `sfx(SFX_MOTOR, CH_MOTOR)`.
+
+- **Detección de flanco**: se usa una variable de estado `pl.motor_on` para detectar la transición reposo→móvil (activar) y móvil→reposo (detener con `sfx(-1, CH_MOTOR)`). Llamar `sfx()` en cada frame reinicia el loop; el flanco evita reinicios innecesarios y garantiza una transición limpia.
+- **Ciclo de vida**: el motor se silencia en `st_reset` (reinicio de partida) y nunca suena en `GS_MENU` ni cuando `btn(4)` está activo (modo apuntado), ya que en ese estado el tanque no se desplaza.
+- **Superposición**: el motor en canal 3 no interfiere con disparo (canal 1), explosión (canal 0) ni golpe (canal 2); los canales son independientes en PICO-8.
+
+**Problema detectado (verificación auditiva):** El dato hex del SFX 3 actual produce un sonido molesto de "ticks de ruido blanco": vol 8 (inválido, máx 7) en la primera nota, pitches altos (67/49) en vez de graves, y `dur=4` (ultracorto, ~31ms/nota) que genera un loop de ~62ms. Wave 0xA en nota1 apunta a un waveform custom no intencional. La lógica de código (flanco, triggers) está correcta; el problema es el dato SFX, no la implementación.
+
+**Corrección aplicada (SFX hex):** Reescrito el dato hex de SFX 3 con wave noise (6), pitches bajos (0x08-0x0e), vol 2, speed 8, loop de 8 notas (~0.5 s ciclo). El resultado es un zumbido grave y tenue.
+
+**Problema detectado en verificación auditiva (2ª ronda):** Tras la corrección del SFX, el sonido mejoró (ya no sonaba a ticks), pero persisten dos problemas:
+1. **El motor no se detiene nunca** — La condición de parada usa `pl.speed==0` (player.lua:84), pero con `SPEED_FRICTION=0.9` la velocidad se aproxima a 0 asintóticamente y jamás lo alcanza en coma flotante. Resultado: una vez activado, el motor suena indefinidamente.
+2. **El sonido sigue algo alto** — El SFX actual tiene vol 2 por nota. Para un sonido que "no debe ser molesto" y no opacar otros SFX, vol 1 (nivel más bajo audible) es más apropiado.
+
+**Corrección aplicada (2ª ronda):**
+- **Threshold de parada**: Cambiado `pl.speed==0` por `abs(pl.speed)<0.01` en player.lua:84.
+- **Volumen**: Reducido SFX 3 hex a vol 1 en todas las notas.
+
+**Problema detectado en verificación auditiva (3ª ronda):** Tras aplicar el umbral `<0.01`, el motor sigue sin detenerse. Causa raíz: **oscillación por umbral asimétrico**. El start usa `pl.speed~=0` (cualquier velocidad no-cero) y el stop usa `abs(pl.speed)<0.01`. Cuando speed está en el rango `(0, 0.01)` (~43 frames, ~1.4s), el motor alterna entre start y stop cada frame, reiniciando el SFX ~15 veces por segundo. El usuario percibe que "nunca se detiene".
+
+**Corrección aplicada (3ª ronda):**
+- **Umbrales simétricos**: Start `abs(pl.speed)>=0.01`, stop `abs(pl.speed)<0.01`. Sin oscillación.
+- **Instrumentos restaurados**: Notas impares del SFX 3 restauradas a instrument 3 (bass) — la reducción de volumen previa había corrompido accidentalmente los instrumentos de notas 1,3,5,7.
+
+**Problema detectado en verificación auditiva (4ª ronda):** Tras los umbrales simétricos, el motor seguía sin detenerse. Diagnóstico: `sfx(-1, CH_MOTOR)` (parada por canal específico) **no funciona en PICO-8**. Solo `sfx(-1)` (parada global, todos los canales) detiene el sonido de forma fiable. `sfx(-2, channel)` libera el loop pero el sonido persiste hasta terminar la iteración actual (~500ms).
+
+**Corrección aplicada (4ª ronda):** Cambiado `sfx(-1,CH_MOTOR)` por `sfx(-1)` (parada global). El motor es el sonido persistente más largo; los otros SFX (disparo, golpe, explosión) son cortos (~0.1-0.3s) y es improbable que estén sonando cuando el motor se detiene. Trade-off aceptable.
+
+**Corrección definitiva (5ª ronda):** Subir el umbral de `0.01` a `0.15` (equivalente a 1 frame de aceleración, SPEED_ACCEL=0.15). Con el umbral bajo, el motor permanecía activo ~50 frames (~1.7s) después de soltar las teclas, durante los cuales la velocidad estaba en un rango "indeciso" donde PICO-8 podía reasignar el SFX a canales alternos. Con umbral 0.15, el motor se apaga casi inmediatamente al soltar las teclas, y `sfx(-1, CH_MOTOR)` (parada por canal) funciona correctamente porque el SFX siempre está en el canal esperado. Se restauró `sfx(-1, CH_MOTOR)` en vez de `sfx(-1)` global.
+
+- Alternativa descartada: sonido por frame sin flanco. Reiniciaría el SFX cada frame, causando cortes audibles y desperdicio de CPU.
 
 ## Risks / Trade-offs
 
 - [Retroceso inesperado al disparar a bocajarro contra muro] -> El impulso (~1.2 px) es pequeño; el clamp de arena y la colisión sólida lo absorben; es parte del "game feel" buscado.
 - [Daño por contacto provocado por el propio retroceso puede sentir injusticia] -> Decisión explícita del usuario (riesgo asumido). Mitigación de balance: impulso pequeño; queda documentado en specs como consecuencia observable.
 - [Ruido de paleta activo durante `en_draw` teñiría otras entidades] -> `pal()` de restablecimiento inmediatamente después del bucle de dibujo de enemigos.
-- [SFX hex en `__sfx__` propenso a errores manuales] -> Verificar reproducción con los criterios de aceptación y, si falla, autoría vía editor SFX de PICO-8.
+- [SFX hex en `__sfx__` propenso a errores manuales] -> Confirmado: el SFX 3 (motor) quedó con vol inválido (8), pitches altos y duración ultracorta; reescrito con noise wave, vol 2 y loop largo (ver D7). En verificación auditiva, vol 2 sigue algo alto → vol 1 propuesto.
 - [Coste CPU si se disparan y mueren efectos a la vez] -> Efectos transitorios y escasos; fade simple por edad sin físicas costosas; verificación con stat(1)/CTRL-P.
+- [Motor no se detiene por comparación exacta con 0] -> Confirmado (2ª ronda): `pl.speed==0` nunca se cumple con `SPEED_FRICTION=0.9`. Corregido con umbral `abs(pl.speed)<0.01`.
+- [Oscillación por umbral asimétrico en motor] -> Confirmado (3ª ronda): start `~=0` y stop `<0.01` causan alternancia cada frame. Corregido con umbrales simétricos `>=0.01` / `<0.01`.
+- [Instrumentos SFX corrompidos al reducir volumen] -> Confirmado (3ª ronda): notas impares del SFX 3 quedaron con instrument 0 en vez de 3. Restaurados.
+- [sfx(-1, channel) no funciona en PICO-8] -> Confirmado (4ª ronda): con umbral bajo (0.01), `sfx(-1, channel)` no detiene el canal. Solucionado subiendo umbral a 0.15 (5ª ronda): el SFX siempre está en el canal esperado y `sfx(-1, channel)` funciona correctamente.
 
 ## Migration Plan
 

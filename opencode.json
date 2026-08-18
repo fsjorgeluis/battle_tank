@@ -6,18 +6,22 @@
       "mode": "subagent",
       "hidden": true,
       "model": "opencode/deepseek-v4-flash-free",
+      "permissions": [
+        { "action": "file:write", "effect": "deny" },
+        { "action": "bash", "effect": "deny" }
+      ]
     },
     "opsx-apply": {
       "description": "Implements an OpenSpec change in the codebase.",
       "mode": "subagent",
       "hidden": true,
-      "model": "opencode/big-pickle",
+      "model": "opencode/big-pickle"
     },
     "opsx-archive": {
       "description": "Archives a completed OpenSpec change.",
       "mode": "subagent",
       "hidden": true,
-      "model": "opencode/big-pickle",
+      "model": "opencode/big-pickle"
     }
   }
 }
