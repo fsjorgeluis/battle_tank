@@ -71,7 +71,7 @@ function st_update_play()
  fx_update()
  -- disparo con X (btnp(5))
  if btnp(5) then
-  bl_fire(pl.x,pl.y,pl.turret_a)
+   bl_fire(pl.x,pl.y,pl.body_a)
  end
  -- comprobar gameover
  if pl.lifes<=0 then

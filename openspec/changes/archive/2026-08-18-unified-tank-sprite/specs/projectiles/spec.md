@@ -1,9 +1,4 @@
-## Purpose
-
-Define el disparo de balas desde el canon del jugador: entrada de disparo,
-movimiento de la bala, despawn y colision con el enemigo, en el estado partida.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Disparar balas con X
 En el estado partida, pulsar X (btnp(5)) SHALL disparar una bala que nace

@@ -14,12 +14,14 @@ end
 function bl_fire(x,y,a)
  if t()<bl.cooldown_until then return end
  bl.cooldown_until=t()+FIRE_COOLDOWN
- local bx=x+cos(a)*BARREL_LEN
- local by=y+sin(a)*BARREL_LEN
- add(bullets,{x=bx,y=by,vx=cos(a)*BULLET_SPEED,vy=sin(a)*BULLET_SPEED,born=t()})
- -- retroceso opuesto al cañon, fogonazo y sonido (solo si dispara)
- pl.rx=-cos(a)*RECOIL_IMPULSE
- pl.ry=-sin(a)*RECOIL_IMPULSE
+ local dir=a
+ local m=MUZZLE[dir]
+ local bx=x+m[1]
+ local by=y+m[2]
+ add(bullets,{x=bx,y=by,vx=cos(dir)*BULLET_SPEED,vy=sin(dir)*BULLET_SPEED,born=t()})
+ -- retroceso opuesto a body_a
+ pl.rx=-cos(dir)*RECOIL_IMPULSE
+ pl.ry=-sin(dir)*RECOIL_IMPULSE
  pl.muzzle_until=t()+0.07
  sfx(SFX_SHOT,CH_SHOT)
 end
