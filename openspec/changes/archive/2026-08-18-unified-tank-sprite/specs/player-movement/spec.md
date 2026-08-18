@@ -1,8 +1,4 @@
-## Purpose
-
-Control del tanque del jugador: 4 direcciones cardinales con aceleracion e inercia, dentro de la arena.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Rotación y desplazamiento del tanque
 El tanque del jugador SHALL estar definido por una posicion (x, y) y un angulo

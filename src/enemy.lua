@@ -9,7 +9,7 @@ function en_init()
  enemies={}
  en.next_respawn=0
  en.last_zone=0
- add(enemies,{x=ENEMY_X,y=ENEMY_Y,hp=ENEMY_HP,flash_until=0})
+ add(enemies,{x=ENEMY_X,y=ENEMY_Y,hp=ENEMY_HP,flash_until=0,dir=0,speed=0})
 end
 
 function en_hit(e)
@@ -48,6 +48,10 @@ function en_update()
   local zi=(en.last_zone)%#ENEMY_ZONES+1
   en.last_zone=zi
   local z=ENEMY_ZONES[zi]
-  add(enemies,{x=z.x,y=z.y,hp=ENEMY_HP,flash_until=0})
+  add(enemies,{x=z.x,y=z.y,hp=ENEMY_HP,flash_until=0,dir=0,speed=0})
+ end
+ -- emitir rastro para enemigos en movimiento
+ for e in all(enemies) do
+  tr_emit(e.x,e.y,e.dir,e.speed)
  end
 end
