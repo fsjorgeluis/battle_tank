@@ -20,6 +20,9 @@ end
 -- HUD en partida
 function ui_draw_play()
  cls(COL_BG)
+ -- dibujar mapa antes que entidades
+ -- pico8.api.map
+ map(0,0,0,0,16,16)
  tr_draw()
  en_draw()
  fx_draw()
@@ -45,6 +48,16 @@ function ui_draw_gameover()
  color(COL_TEXT)
  print("game over",40,40,COL_RED)
  print("toques recibidos: "..gs.game.hits,20,55,COL_TEXT)
+ print("puntos: "..gs.game.score,20,65,COL_TEXT)
+ print("x para reintentar",24,80,COL_GREY)
+end
+
+-- victoria
+function ui_draw_victory()
+ cls(COL_BG)
+ color(COL_TEXT)
+ print("victoria",44,40,11)
+ print("base enemiga destruida",18,55,COL_TEXT)
  print("puntos: "..gs.game.score,20,65,COL_TEXT)
  print("x para reintentar",24,80,COL_GREY)
 end

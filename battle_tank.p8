@@ -3,6 +3,7 @@ version 43
 __lua__
 #include src/const.lua
 #include src/util.lua
+#include src/map.lua
 #include src/track.lua
 #include src/states.lua
 #include src/player.lua
@@ -12,6 +13,7 @@ __lua__
 #include src/ui.lua
 
 function _init()
+ map_init()
  st_init()
  tr_init()
  pl_init()

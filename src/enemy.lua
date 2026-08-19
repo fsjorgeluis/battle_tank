@@ -9,7 +9,9 @@ function en_init()
  enemies={}
  en.next_respawn=0
  en.last_zone=0
- add(enemies,{x=ENEMY_X,y=ENEMY_Y,hp=ENEMY_HP,flash_until=0,dir=0,speed=0})
+ -- spawn inicial en borde superior aleatorio
+ local tx,ty=map_find_empty_top_spawn()
+ add(enemies,{x=tx*8+4,y=ty*8+4,hp=ENEMY_HP,flash_until=0,dir=0,speed=0})
 end
 
 function en_hit(e)
@@ -44,11 +46,9 @@ end
 
 function en_update()
  if #enemies==0 and t()>=en.next_respawn then
-  -- zona distinta de la anterior (índice circular determinista)
-  local zi=(en.last_zone)%#ENEMY_ZONES+1
-  en.last_zone=zi
-  local z=ENEMY_ZONES[zi]
-  add(enemies,{x=z.x,y=z.y,hp=ENEMY_HP,flash_until=0,dir=0,speed=0})
+  -- respawn en borde superior aleatorio
+  local tx,ty=map_find_empty_top_spawn()
+  add(enemies,{x=tx*8+4,y=ty*8+4,hp=ENEMY_HP,flash_until=0,dir=0,speed=0})
  end
  -- emitir rastro para enemigos en movimiento
  for e in all(enemies) do

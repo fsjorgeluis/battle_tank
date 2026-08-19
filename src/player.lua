@@ -7,8 +7,10 @@
 pl={}
 
 function pl_init()
- pl.x=PLAYER_X
- pl.y=PLAYER_Y
+ -- spawn sobre la base aliada: centro del tile (7,14)
+ -- pico8.constraint.sprite-size
+ pl.x=7*8+4
+ pl.y=12*8+4
  pl.body_a=0
  pl.speed=0
  pl.lifes=INITIAL_LIFES
@@ -19,6 +21,38 @@ function pl_init()
  pl.ry=0
  pl.muzzle_until=0
  pl.motor_on=false
+end
+
+-- comprueba si el movimiento a (x,y) entra en un tile solido nuevo
+-- permite salir de un tile solido en el que ya se este (spawn sobre base)
+function pl_enters_solid(x,y)
+ local x1=x-COLLISION_INSET
+ local y1=y-COLLISION_INSET
+ local x2=x+COLLISION_INSET
+ local y2=y+COLLISION_INSET
+ local px1=pl.prev_x-COLLISION_INSET
+ local py1=pl.prev_y-COLLISION_INSET
+ local px2=pl.prev_x+COLLISION_INSET
+ local py2=pl.prev_y+COLLISION_INSET
+ local tx1=flr(x1/8)
+ local ty1=flr(y1/8)
+ local tx2=flr(x2/8)
+ local ty2=flr(y2/8)
+ local ptx1=flr(px1/8)
+ local pty1=flr(py1/8)
+ local ptx2=flr(px2/8)
+ local pty2=flr(py2/8)
+ for tx=tx1,tx2 do
+  for ty=ty1,ty2 do
+   if map_is_solid(tx,ty) then
+    -- solo bloquea si este tile solido no estaba ya cubierto
+    if tx<ptx1 or tx>ptx2 or ty<pty1 or ty>pty2 then
+     return true
+    end
+   end
+  end
+ end
+ return false
 end
 
 function pl_update()
@@ -92,6 +126,12 @@ function pl_update()
    pl.x=pl.prev_x
    pl.y=pl.prev_y
   end
+ end
+
+ -- colision con tiles solidos (ladrillo, metal, bases)
+ if pl_enters_solid(pl.x,pl.y) then
+  pl.x=pl.prev_x
+  pl.y=pl.prev_y
  end
 
  -- clamp a arena 128x128

@@ -14,6 +14,7 @@ function st_set_state(newstate)
 end
 
 function st_reset()
+ map_generate()
  tr_init()
  pl_init()
  en_init()
@@ -21,6 +22,7 @@ function st_reset()
  fx_init()
  sfx(-1,CH_MOTOR)
  gs.game.score=0
+ gs.game.hits=0
  gs.state=GS_PLAY
 end
 
@@ -31,6 +33,8 @@ function st_update()
   st_update_play()
  elseif gs.state==GS_GAMEOVER then
   st_update_gameover()
+ elseif gs.state==GS_VICTORY then
+  st_update_victory()
  end
 end
 
@@ -41,6 +45,8 @@ function st_draw()
   ui_draw_play()
  elseif gs.state==GS_GAMEOVER then
   ui_draw_gameover()
+ elseif gs.state==GS_VICTORY then
+  ui_draw_victory()
  end
 end
 
@@ -83,6 +89,13 @@ end
 
 -- game over
 function st_update_gameover()
+ if btnp(5) then
+  st_reset()
+ end
+end
+
+-- victoria
+function st_update_victory()
  if btnp(5) then
   st_reset()
  end

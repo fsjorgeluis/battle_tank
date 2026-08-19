@@ -18,7 +18,9 @@ function bl_fire(x,y,a)
  local m=MUZZLE[dir]
  local bx=x+m[1]
  local by=y+m[2]
- add(bullets,{x=bx,y=by,vx=cos(dir)*BULLET_SPEED,vy=sin(dir)*BULLET_SPEED,born=t()})
+ -- tile de spawn: tile del jugador, no del punto de nacimiento de la bala
+ -- asi se evita saltar el muro adyacente cuando el tanque dispara pegado
+ add(bullets,{x=bx,y=by,vx=cos(dir)*BULLET_SPEED,vy=sin(dir)*BULLET_SPEED,born=t(),sx=flr(x/8),sy=flr(y/8)})
  -- retroceso opuesto a body_a
  pl.rx=-cos(dir)*RECOIL_IMPULSE
  pl.ry=-sin(dir)*RECOIL_IMPULSE
@@ -38,36 +40,85 @@ function bl_update()
   elseif t()-b.born>BULLET_LIFE then
    -- timeout
   else
-   -- colisión bala-enemigo
-   local bx1=b.x-BULLET_SIZE/2
-   local by1=b.y-BULLET_SIZE/2
-   local bx2=b.x+BULLET_SIZE/2
-   local by2=b.y+BULLET_SIZE/2
-   local hit=false
-   for e in all(enemies) do
-    local ex1=e.x-SPR_SIZE/2
-    local ey1=e.y-SPR_SIZE/2
-    local ex2=e.x+SPR_SIZE/2
-    local ey2=e.y+SPR_SIZE/2
-    if ut_aabb_overlap(bx1,by1,bx2,by2,ex1,ey1,ex2,ey2) then
-     fx_hit(e.x,e.y)
-     local died=en_hit(e)
-     if not died then
-      sfx(SFX_HIT,CH_HIT)
-     else
-      en_kill(e)
-      fx_explode(e.x,e.y)
-      sfx(SFX_BOOM,CH_BOOM)
+    -- colision bala-tile: tile actual y tile frontal
+     local hit=false
+     local tiles_to_check={}
+     local tx=flr(b.x/8)
+     local ty=flr(b.y/8)
+     add(tiles_to_check,{tx,ty})
+     -- comprobar tile inmediatamente delante segun direccion
+     if b.vx>0 then
+      add(tiles_to_check,{flr((b.x+3.9)/8),ty})
+     elseif b.vx<0 then
+      add(tiles_to_check,{flr((b.x-3.9)/8),ty})
      end
-     hit=true
-     break
+     if b.vy>0 then
+      add(tiles_to_check,{tx,flr((b.y+3.9)/8)})
+     elseif b.vy<0 then
+      add(tiles_to_check,{tx,flr((b.y-3.9)/8)})
+     end
+
+     for tc in all(tiles_to_check) do
+      local ttx,tty=tc[1],tc[2]
+      -- ignorar tile de spawn (donde estaba el jugador al disparar)
+      if ttx==b.sx and tty==b.sy then
+       -- skip
+      else
+       local tile=mget(ttx,tty)
+       if tile~=0 then
+        if fget(tile,FLAG_BASE) then
+         -- base enemiga = victoria, base aliada = game over
+         if tile==TILE_BASE_ENEMY then
+          st_set_state(GS_VICTORY)
+         else
+          st_set_state(GS_GAMEOVER)
+         end
+         hit=true
+         break
+        elseif fget(tile,FLAG_BREAKABLE) then
+         -- destruir ladrillo
+         mset(ttx,tty,0)
+         hit=true
+         break
+        elseif fget(tile,FLAG_SOLID) then
+         -- rebotar en metal/borde sin destruir
+         hit=true
+         break
+        end
+       end
+      end
+     end
+    if not hit then
+     -- colision bala-enemigo
+     local bx1=b.x-BULLET_SIZE/2
+     local by1=b.y-BULLET_SIZE/2
+     local bx2=b.x+BULLET_SIZE/2
+     local by2=b.y+BULLET_SIZE/2
+     for e in all(enemies) do
+      local ex1=e.x-SPR_SIZE/2
+      local ey1=e.y-SPR_SIZE/2
+      local ex2=e.x+SPR_SIZE/2
+      local ey2=e.y+SPR_SIZE/2
+      if ut_aabb_overlap(bx1,by1,bx2,by2,ex1,ey1,ex2,ey2) then
+       fx_hit(e.x,e.y)
+       local died=en_hit(e)
+       if not died then
+        sfx(SFX_HIT,CH_HIT)
+       else
+        en_kill(e)
+        fx_explode(e.x,e.y)
+        sfx(SFX_BOOM,CH_BOOM)
+       end
+       hit=true
+       break
+      end
+     end
+    end
+    if not hit then
+     add(alive,b)
     end
    end
-   if not hit then
-    add(alive,b)
-   end
   end
- end
  bullets=alive
 end
 

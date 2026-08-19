@@ -7,6 +7,7 @@
 GS_MENU=1
 GS_PLAY=2
 GS_GAMEOVER=3
+GS_VICTORY=4
 
 -- colores
 COL_BG=0
