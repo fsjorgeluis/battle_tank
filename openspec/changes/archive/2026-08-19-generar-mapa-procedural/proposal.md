@@ -4,14 +4,14 @@ Hoy el juego transcurre en un arena vacía de 128×128 píxeles. El jugador y el
 
 ## What Changes
 
-- Generar un mapa de 16×16 tiles de forma procedural en cada partida usando el algoritmo de excavación (caminante aleatorio) con sesgo hacia arriba.
-- Llenar inicialmente el mapa de ladrillos rompibles (sprite 11), luego excavar caminos que conecten la base aliada (sprite 13 en tile 7,14) con la base enemiga (sprite 14 en tile 7,1).
+- Generar un mapa de 16×16 tiles de forma procedural en cada partida usando división recursiva seguida de erosión de paredes.
+- Llenar inicialmente el mapa de ladrillos rompibles (sprite 11), luego generar un laberinto que conecte la base aliada (sprite 13 en tile aleatorio de la fila 14) con la base enemiga (sprite 14 en tile aleatorio de la fila 1).
 - Añadir un borde exterior de metal irrompible (sprite 12) y esparcir bloques de metal aleatorios en el interior.
 - Dibujar el mapa con `map()` antes de renderizar entidades.
 - Hacer que el jugador colisione con tiles sólidos (ladrillo, metal, bases) en lugar de solo con los bordes de pantalla.
-- Hacer que las balas destruyan ladrillos al impactar, reboten contra el metal y detonen las bases.
+- Hacer que las balas destruyan ladrillos al impactar, desaparezcan al impactar metal y detonen las bases.
 - Añadir condiciones de victoria/derrota instantáneas: destruir la base enemiga gana la partida; que destruyan la base aliada pierde la partida.
-- Posicionar al jugador sobre la base aliada y a los enemigos en posiciones aleatorias del borde superior.
+- Posicionar al jugador dos tiles por encima de la base aliada y a los enemigos en posiciones aleatorias del borde superior, fuera de la cámara de la base enemiga.
 - Modelar las propiedades de los tiles mediante los flags de sprite de PICO-8 en lugar de índices mágicos en el código.
 
 ## Capabilities
@@ -21,7 +21,7 @@ Hoy el juego transcurre en un arena vacía de 128×128 píxeles. El jugador y el
 
 ### Modified Capabilities
 - `game-flow`: Se amplían las transiciones de partida para incluir victoria al destruir la base enemiga y derrota al destruir la base aliada, además de la derrota por salud actual.
-- `projectiles`: Las balas ahora interactúan con tiles del mapa (destruyen ladrillos, rebotan en metal, detonan bases).
+- `projectiles`: Las balas ahora interactúan con tiles del mapa (destruyen ladrillos, desaparecen al impactar metal, detonan bases).
 - `player-movement`: El movimiento del jugador ahora respeta tiles sólidos del mapa, no solo los bordes de la pantalla.
 
 ## Impact

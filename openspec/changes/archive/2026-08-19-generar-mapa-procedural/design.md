@@ -38,29 +38,32 @@ Durante la primera implementación se sobreescribieron los sprites dibujados por
 ### Algoritmo de división recursiva + erosión
 **Rationale:** El autómata celular produjo cuevas abiertas en lugar de un laberinto estructurado. La división recursiva genera un laberinto perfecto con pasillos claros de 1 tile. Sin embargo, un laberinto perfecto tiene exactamente un camino entre dos puntos, lo cual es frustrante para tanques porque puede atrapar al jugador. La erosión aleatoria de paredes internas introduce ciclos y rutas alternativas, convirtiendo el laberinto en un campo de batalla táctico.
 **Pasos concretos:**
-1. `map_clear()` llena todo de ladrillo.
-2. Se deja el borde exterior como ladrillo y se limpia el interior.
-3. `map_recursive_division(x, y, w, h)` genera un laberinto perfecto:
+1. Elegir `BASE_ENEMY_X` y `BASE_ALLY_X` aleatorias en `[2, 13]`.
+2. `map_clear()` llena todo de ladrillo.
+3. Se deja el borde exterior como ladrillo y se limpia el interior.
+4. `map_recursive_division(x, y, w, h)` genera un laberinto perfecto, respetando las zonas de base marcadas por `map_is_base_zone(tx,ty)`:
    - Si el área es demasiado pequeña, detenerse.
    - Elegir orientación (horizontal si `h > w`, vertical si `w > h`, aleatorio si iguales).
-   - Trazar una pared horizontal o vertical a través de la zona.
-   - Abrir exactamente una puerta (tile vacío) en la pared.
+   - Trazar una pared horizontal o vertical a través de la zona, salvo que el tile pertenezca a una zona de base.
+   - Abrir exactamente una puerta (tile vacío) en dicha pared.
    - Llamar recursivamente en los dos sub-espacios.
-4. `map_erode_walls(0.10)` recorre paredes interiores y elimina ~10 % de ellas al azar, respetando bordes y zonas de base.
-5. `map_place_bases()` coloca bases con escudo de ladrillos.
-6. `map_ensure_base_connectivity()` talla un corto corredor desde la apertura frontal de cada base hacia el laberinto para garantizar que ambas bases estén conectadas.
+5. `map_erode_walls(0.10)` recorre paredes interiores y elimina ~10 % de ellas al azar, respetando bordes y zonas de base protegidas.
+6. `map_place_bases()` coloca bases dentro de cámaras 3×2 completamente selladas con ladrillos (o metal cuando la pared toca el borde del mapa).
+7. `map_place_metal_border()` reemplaza el anillo exterior por metal irrompible.
+8. `map_scatter_metal()` esparce bloques de metal en el interior, evitando zonas de base.
+9. Opcionalmente, `map_check_connectivity()` verifica por BFS que el laberinto conecta ambas cámaras; si falla, se regenera el mapa.
 
 ### Pasillos de 1 tile
 **Rationale:** Decisión del usuario. En una cuadrícula de 16×16, los pasillos de 1 tile permiten un laberinto denso y complejo. El sprite del tanque de 8×8 rozará visualmente las paredes, pero la hitbox reducida permite navegarlos.
 
-### Protección de bases con escudo de ladrillos
-**Rationale:** La prueba mostró que una zona segura demasiado pequeña aísla la base del laberinto, mientras que una zona demasiado grande disuelve visualmente el escudo. Un área 4×3 con un escudo compacto de ladrillos rompibles protege la base, mantiene una apertura frontal de 2 tiles y deja espacio para que el tanque maniobre.
-**Patrón:** Para una base en (bx, by), limpiar un área 4×3 frente a la base (`x=bx-1..bx+2`, `y=by..by+2` para la enemiga o `y=by-2..by` para la aliada), colocar ladrillos en `(bx-1, by)`, `(bx+2, by)`, `(bx-1, by±1)` y `(bx+2, by±1)`. La apertura frontal de 2 tiles queda en `(bx, by±1)` y `(bx+1, by±1)`.
-**Conectividad:** Tras colocar las bases, se talla un corto corredor de 1 tile desde la apertura frontal hacia el centro del mapa (`x=bx`, `y=by-4..by-1` para la aliada; `x=bx`, `y=by+1..by+4` para la enemiga) para garantizar que cada base esté conectada al laberinto.
+### Protección de bases con cámaras 3×2 completamente selladas
+**Rationale:** El escudo anterior dejaba la base expuesta por el frente y el corredor de conectividad recto generaba una línea de visión directa. Una cámara 3×2 sellada obliga al jugador a destruir al menos un ladrillo para acceder a la base, eliminando los atajos visuales y añadiendo tensión táctica.
+**Patrón:** Para una base en (bx, by), la cámara ocupa `x=bx-1..bx+1` e `y=by..by±1` (frente a la base). La base se coloca en `(bx, by)`. Los laterales `(bx-1, by)` y `(bx+1, by)` son ladrillos. El muro frontal completo `(bx-1, by±1)`, `(bx, by±1)` y `(bx+1, by±1)` son ladrillos. La retaguardia queda protegida por el borde exterior de metal. Si una pared lateral cae en la columna 1 o 14, se usa metal irrompible en lugar de ladrillo, extendiendo el borde del mapa y reforzando la protección en posiciones extremas.
+**Conectividad:** La cámara se marca como zona protegida antes de la división recursiva, por lo que el laberinto crece alrededor de ella sin túneles artificiales. El jugador llega a la cámara a través del laberinto natural y debe romper un ladrillo para entrar. Un BFS ligero opcional verifica que ambas cámaras estén en la misma región conectada.
 
 ### Borde exterior de metal + metal disperso
 **Rationale:** El borde evita que entidades salgan de pantalla y proporciona un marco indestructible. El metal disperso añade obstáculos permanentes que obligan a tomar decisiones tácticas.
-**Cantidad:** 5-10 bloques de metal en el interior, colocados solo sobre ladrillos y nunca adyacentes a una base ni dentro del escudo de una base.
+**Cantidad:** 5-10 bloques de metal en el interior, colocados solo sobre ladrillos y nunca dentro de las zonas de base protegidas por `map_is_base_zone(tx,ty)`.
 
 ## Risks / Trade-offs
 
@@ -71,10 +74,16 @@ Durante la primera implementación se sobreescribieron los sprites dibujados por
   → **Mitigation:** Probabilidad de erosión ajustada a 0.10 para mantener la sensación de laberinto denso con pocas rutas alternativas.
 
 - **[Risk]** Los bloques de metal aleatorios podrían cortar rutas alternativas.
-  → **Mitigation:** Solo se colocan sobre tiles de ladrillo, nunca sobre tiles vacíos, y nunca dentro de la zona del escudo de una base.
+  → **Mitigation:** Solo se colocan sobre tiles de ladrillo, nunca sobre tiles vacíos, y nunca dentro de las zonas de base protegidas.
 
 - **[Risk]** El tanque spawnea sobre la base aliada.
-  → **Mitigation:** Se cambia el spawn del jugador a (7, 12), dos tiles debajo de la base.
+  → **Mitigation:** El spawn del jugador usa `BASE_ALLY_X` y se ubica en `y=12`, dos tiles por encima de la base aliada, fuera de la cámara sellada.
+
+- **[Risk]** Una base sellada podría quedar aislada del laberinto si el generador coloca paredes alrededor.
+  → **Mitigation:** Las cámaras se marcan como zonas protegidas antes de la división recursiva, y opcionalmente se verifica conectividad mediante BFS, regenerando el mapa si es necesario.
+
+- **[Risk]** Al eliminar el corredor recto de conectividad podría persistir una línea de visión directa entre bases.
+  → **Mitigation:** La conectividad depende únicamente del laberinto de división recursiva; al no tallar un túnel central, no hay garantía de línea recta despejada.
 
 - **[Risk]** La colisión bala-tile por muestreo de un solo tile hace que disparos desde muy cerca traspasen el muro inmediato.
   → **Mitigation:** Se reemplaza el muestreo puntual por comprobación del tile actual y el tile frontal según la dirección de movimiento.

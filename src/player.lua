@@ -7,9 +7,9 @@
 pl={}
 
 function pl_init()
- -- spawn sobre la base aliada: centro del tile (7,14)
+ -- spawn dos tiles por encima de la base aliada
  -- pico8.constraint.sprite-size
- pl.x=7*8+4
+ pl.x=BASE_ALLY_X*8+4
  pl.y=12*8+4
  pl.body_a=0
  pl.speed=0

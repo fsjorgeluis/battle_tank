@@ -1,6 +1,6 @@
 ## Purpose
 
-Control del tanque del jugador: 4 direcciones cardinales con aceleracion e inercia, dentro de la arena.
+Control del tanque del jugador: 4 direcciones cardinales con aceleracion e inercia, dentro de la arena y respetando tiles sólidos del mapa.
 
 ## Requirements
 
@@ -50,13 +50,26 @@ correspondiente. Sin retroceso (↓ no es "atras").
 - **THEN** el tanque del jugador ocupa dos sprites: sprite 0 (canon arriba)
   y sprite 1 (canon izquierda)
 
-### Requirement: Límites de la arena
+### Requirement: Límites de la arena y colisión con tiles sólidos
 El tanque SHALL quedar contenido dentro del area de juego de la pantalla
-completa (128x128). Al alcanzar un borde, el tanque SHALL detenerse sin
-salirse del area y solo podra separarse del borde rotando o invirtiendo la
-marcha.
+completa (128x128) y no SHALL atravesar tiles sólidos del mapa (ladrillo,
+metal ni bases). Al alcanzar un borde o un tile sólido, el tanque SHALL
+detenerse sin traspasarlo y solo podra separarse del borde o del tile
+rotando o invirtiendo la marcha.
 
 #### Scenario: Los cuatro bordes
 - **WHEN** el tanque intenta salir por cualquiera de los cuatro bordes de la
   arena
 - **THEN** se detiene en el borde correspondiente sin traspasarlo
+
+#### Scenario: Colisión con ladrillo
+- **WHEN** el tanque se mueve hacia un tile de ladrillo
+- **THEN** el tanque se detiene antes de ocupar ese tile
+
+#### Scenario: Colisión con metal
+- **WHEN** el tanque se mueve hacia un tile de metal
+- **THEN** el tanque se detiene antes de ocupar ese tile
+
+#### Scenario: Colisión con base
+- **WHEN** el tanque se mueve hacia un tile de base
+- **THEN** el tanque se detiene antes de ocupar ese tile

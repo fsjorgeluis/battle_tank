@@ -8,7 +8,7 @@ Una bala SHALL detectar el tile que ocupa su centro en cada frame. Si el tile ti
 - **THEN** el tile cambia a vacío
 - **THEN** la bala desaparece
 
-#### Scenario: Bala rebota en metal
+#### Scenario: Bala impacta metal
 - **WHEN** una bala impacta un tile de metal (sprite 12)
 - **THEN** el tile permanece intacto
 - **THEN** la bala desaparece
