@@ -5,19 +5,20 @@ Define la generacion procedural del mapa de juego, sus tiles (ladrillo rompible,
 ## Requirements
 
 ### Requirement: El mapa se genera proceduralmente al iniciar cada partida
-El sistema SHALL generar un mapa nuevo de 16x16 tiles en `_init` de cada partida usando un algoritmo hibrido: division recursiva para crear un laberinto perfecto con pasillos de 1 tile, seguido de una erosion aleatoria de paredes internas para crear rutas alternativas. El mapa SHALL cubrir exactamente el area visible de 128x128 pixeles (pico8.constraint.display-resolution, pico8.constraint.sprite-size).
+El sistema SHALL generar un mapa nuevo de **16x14 tiles** en `_init` de cada partida usando un algoritmo hibrido: division recursiva para crear un laberinto perfecto con pasillos de 1 tile, seguido de una erosion aleatoria de paredes internas para crear rutas alternativas. El mapa SHALL ocupar un área de 128x112 píxeles, renderizándose debajo de la franja de 16 píxeles reservada para el HUD (`pico8.constraint.display-resolution`, `pico8.constraint.sprite-size`).
 
 #### Scenario: Nueva partida, nuevo mapa
 - **WHEN** el jugador inicia una partida desde el menu o reintenta desde game over
 - **THEN** el mapa se regenera con una disposicion diferente de paredes y caminos
+- **THEN** el mapa generado tiene 16 columnas y 14 filas de tiles
 
 ### Requirement: Las bases ocupan posiciones aleatorias y estan completamente selladas por ladrillos
-El sistema SHALL elegir una columna aleatoria `BASE_ENEMY_X` en el rango [2, 13] para la base enemiga (fila 1) y una columna aleatoria `BASE_ALLY_X` en el rango [2, 13] para la base aliada (fila 14), seleccionando ambas posiciones antes de generar el laberinto. El sistema SHALL construir una camara de 3x2 tiles alrededor de cada base: la base ocupa el tile central de la fila trasera; los tiles laterales y el muro frontal de la camara SHALL ser ladrillos rompibles (sprite 11). Si una pared lateral cae sobre la columna 1 o 14, el sistema SHALL usar metal irrompible (sprite 12) en esos tiles, extendiendo el borde del mapa. La retaguardia de cada base SHALL quedar protegida por el borde exterior de metal. La unica forma de acceder a una base SHALL ser destruyendo al menos un ladrillo de su camara.
+El sistema SHALL elegir una columna aleatoria `BASE_ENEMY_X` en el rango [2, 13] para la base enemiga (fila 1) y una columna aleatoria `BASE_ALLY_X` en el rango [2, 13] para la base aliada (fila 12), seleccionando ambas posiciones antes de generar el laberinto. El sistema SHALL construir una camara de 3x2 tiles alrededor de cada base: la base ocupa el tile central de la fila trasera; los tiles laterales y el muro frontal de la camara SHALL ser ladrillos rompibles (sprite 11). Si una pared lateral cae sobre la columna 1 o 14, el sistema SHALL usar metal irrompible (sprite 12) en esos tiles, extendiendo el borde del mapa. La retaguardia de cada base SHALL quedar protegida por el borde exterior de metal. La unica forma de acceder a una base SHALL ser destruyendo al menos un ladrillo de su camara.
 
 #### Scenario: Posicion de bases
 - **WHEN** se genera el mapa
 - **THEN** la base enemiga aparece en la fila 1 con una columna entre 2 y 13
-- **THEN** la base aliada aparece en la fila 14 con una columna entre 2 y 13
+- **THEN** la base aliada aparece en la fila 12 con una columna entre 2 y 13
 - **THEN** las posiciones son diferentes en partidas distintas
 
 #### Scenario: Camara completamente sellada
@@ -60,7 +61,7 @@ Despues de generar el laberinto perfecto, el sistema SHALL recorrer las paredes 
 - **THEN** ninguna pared del borde exterior ni de las zonas de base fue eliminada
 
 ### Requirement: El borde exterior es metal irrompible
-El sistema SHALL reemplazar todos los tiles del anillo exterior (fila 0, fila 15, columna 0, columna 15) por metal (sprite 12). Estos tiles SHALL ser irrompibles.
+El sistema SHALL reemplazar todos los tiles del anillo exterior (fila 0, fila 13, columna 0, columna 15) por metal (sprite 12). Estos tiles SHALL ser irrompibles.
 
 #### Scenario: Marco indestructible
 - **WHEN** una bala impacta contra el borde exterior
@@ -87,14 +88,15 @@ El sistema SHALL usar los flags de sprite de PICO-8 (`fget`/`fset`) para determi
 - **THEN** el sistema consulta `fget(mget(tx, ty), 1)` para decidir si lo destruye
 
 ### Requirement: El mapa se renderiza antes que las entidades
-El sistema SHALL llamar `map(0, 0, 0, 0, 16, 16)` al inicio de `_draw` antes de dibujar balas, enemigos y jugador (`pico8.api.map`).
+El sistema SHALL llamar `map(0, 0, 0, 0, 16, 14)` al inicio de `_draw` antes de dibujar balas, enemigos y jugador, con la cámara desplazada para que el mapa quede debajo de la franja del HUD (`pico8.api.map`, `pico8.api.camera`).
 
 #### Scenario: Orden de render
 - **WHEN** se dibuja un frame de partida
 - **THEN** el fondo del mapa aparece detras de todas las entidades
+- **THEN** el mapa ocupa solo el area debajo del HUD
 
 ### Requirement: El jugador spawnea cerca de la base aliada
-El sistema SHALL posicionar al jugador en el centro del tile (`BASE_ALLY_X`, 12), dos tiles por encima de la base aliada, al iniciar la partida.
+El sistema SHALL posicionar al jugador en el centro del tile (`BASE_ALLY_X`, 10), dos tiles por encima de la base aliada, al iniciar la partida.
 
 #### Scenario: Spawn del jugador
 - **WHEN** comienza la partida

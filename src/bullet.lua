@@ -33,9 +33,9 @@ function bl_update()
  for b in all(bullets) do
   b.x=b.x+b.vx
   b.y=b.y+b.vy
-  -- fuera de arena (margen BULLET_SIZE)
-  if b.x<-BULLET_SIZE or b.x>127+BULLET_SIZE
-   or b.y<-BULLET_SIZE or b.y>127+BULLET_SIZE then
+  -- fuera del mundo jugable (margen BULLET_SIZE)
+  if b.x<-BULLET_SIZE or b.x>WORLD_W+BULLET_SIZE
+   or b.y<-BULLET_SIZE or b.y>WORLD_H+BULLET_SIZE then
    -- descartar
   elseif t()-b.born>BULLET_LIFE then
    -- timeout

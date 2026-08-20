@@ -7,10 +7,10 @@
 pl={}
 
 function pl_init()
- -- spawn dos tiles por encima de la base aliada
+ -- spawn dos tiles por encima de la base aliada (fila 10)
  -- pico8.constraint.sprite-size
  pl.x=BASE_ALLY_X*8+4
- pl.y=12*8+4
+ pl.y=10*8+4
  pl.body_a=0
  pl.speed=0
  pl.lifes=INITIAL_LIFES
@@ -134,10 +134,10 @@ function pl_update()
   pl.y=pl.prev_y
  end
 
- -- clamp a arena 128x128
- -- pico8.constraint.display-resolution
- pl.x=ut_clamp(pl.x,SPR_SIZE/2,127-SPR_SIZE/2)
- pl.y=ut_clamp(pl.y,SPR_SIZE/2,127-SPR_SIZE/2)
+ -- clamp a los limites logicos del mundo
+ -- pico8.constraint.display-resolution, pico8.constraint.sprite-size
+ pl.x=ut_clamp(pl.x,SPR_SIZE/2,WORLD_W-SPR_SIZE/2)
+ pl.y=ut_clamp(pl.y,SPR_SIZE/2,WORLD_H-SPR_SIZE/2)
 
  -- emitir rastro de orugas segun velocidad real
  -- pico8.concept.game-loop

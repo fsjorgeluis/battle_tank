@@ -7,8 +7,13 @@
 
 -- dimensiones y tiles
 MAP_W=16
-MAP_H=16
+MAP_H=14
 TILE_BRICK=11
+
+-- tamano logico del mundo en pixeles
+-- pico8.constraint.sprite-size
+WORLD_W=MAP_W*8
+WORLD_H=MAP_H*8
 TILE_METAL=12
 TILE_BASE_ALLY=13
 TILE_BASE_ENEMY=14
@@ -44,7 +49,7 @@ end
 
 function map_is_base_zone(tx,ty)
  return (tx>=BASE_ENEMY_X-1 and tx<=BASE_ENEMY_X+1 and ty>=1 and ty<=2)
-     or (tx>=BASE_ALLY_X-1 and tx<=BASE_ALLY_X+1 and ty>=13 and ty<=14)
+     or (tx>=BASE_ALLY_X-1 and tx<=BASE_ALLY_X+1 and ty>=11 and ty<=12)
 end
 
 function map_place_base_with_shield(bx,by,s)
@@ -58,8 +63,9 @@ function map_place_base_with_shield(bx,by,s)
   front_y=by-1
  end
  -- coloca ladrillo o metal si toca el borde del mapa
- local function place_wall(x,y)
-  if x>=1 and x<=14 and y>=1 and y<=14 then
+  local function place_wall(x,y)
+  -- paredes interiores: no tocar fila MAP_H-1 (borde de metal)
+  if x>=1 and x<=14 and y>=1 and y<=MAP_H-2 then
    if x==1 or x==14 then
     mset(x,y,TILE_METAL)
    else
@@ -78,7 +84,7 @@ end
 
 function map_place_bases()
  map_place_base_with_shield(BASE_ENEMY_X,1,TILE_BASE_ENEMY)
- map_place_base_with_shield(BASE_ALLY_X,14,TILE_BASE_ALLY)
+ map_place_base_with_shield(BASE_ALLY_X,12,TILE_BASE_ALLY)
 end
 
 function map_recursive_division(x,y,w,h)
@@ -176,11 +182,11 @@ function map_scatter_metal(count)
 end
 
 function map_check_connectivity()
- -- bfs ligero desde spawn aliado hasta vecindad de base enemiga
+ -- bfs ligero desde spawn aliado (fila 10) hasta vecindad de base enemiga
  -- pico8.api.add, pico8.api.abs
  local v={}
- local q={{BASE_ALLY_X,12}}
- v[BASE_ALLY_X*16+12]=true
+ local q={{BASE_ALLY_X,10}}
+ v[BASE_ALLY_X*16+10]=true
  local head=1
  while head<=#q do
   local c=q[head]
@@ -194,8 +200,8 @@ function map_check_connectivity()
    for dy=-1,1 do
     if dx~=0 or dy~=0 then
      local nx,ny=x+dx,y+dy
-     local k=nx*16+ny
-     if nx>=1 and nx<=14 and ny>=1 and ny<=14 and not v[k] and mget(nx,ny)==0 then
+      local k=nx*16+ny
+      if nx>=1 and nx<=14 and ny>=1 and ny<=MAP_H-2 and not v[k] and mget(nx,ny)==0 then
       v[k]=true
       add(q,{nx,ny})
      end
@@ -224,10 +230,10 @@ function map_generate()
   map_erode_walls(0.10)
   -- colocar bases en camaras 3x2 selladas
   map_place_bases()
-  -- asegurar espacio de spawn del jugador frente a la base aliada
-  mset(BASE_ALLY_X-1,12,0)
-  mset(BASE_ALLY_X,12,0)
-  mset(BASE_ALLY_X+1,12,0)
+ -- asegurar espacio de spawn del jugador (2 filas arriba de la base aliada)
+ mset(BASE_ALLY_X-1,10,0)
+ mset(BASE_ALLY_X,10,0)
+ mset(BASE_ALLY_X+1,10,0)
   -- marco de metal irrompible
   map_place_metal_border()
   -- bloques de metal interiores

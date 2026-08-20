@@ -20,14 +20,20 @@ end
 -- HUD en partida
 function ui_draw_play()
  cls(COL_BG)
+ -- desplazar origen del mundo para dejar franja del HUD libre
+ -- pico8.api.camera
+ camera(0,-HUD_H)
  -- dibujar mapa antes que entidades
  -- pico8.api.map
- map(0,0,0,0,16,16)
+ map(0,0,0,0,16,14)
  tr_draw()
  en_draw()
  fx_draw()
  pl_draw()
  bl_draw()
+ -- restablecer camara para dibujar HUD en coordenadas de pantalla
+ -- pico8.api.camera
+ camera(0,0)
  ui_draw_hud()
 end
 

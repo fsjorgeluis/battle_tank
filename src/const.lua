@@ -44,6 +44,10 @@ ENEMY_Y=64
 -- tamano del sprite
 SPR_SIZE=8
 
+-- franja superior fija para el HUD (2 filas de 8 px)
+-- pico8.constraint.display-resolution, pico8.constraint.sprite-size
+HUD_H=16
+
 -- inset de colision del jugador (perdon al jugador)
 COLLISION_INSET=2
 
