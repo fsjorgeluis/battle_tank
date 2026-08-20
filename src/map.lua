@@ -5,27 +5,18 @@
 -- pico8.constraint.map-size, pico8.constraint.sprite-size,
 -- pico8.constraint.display-resolution
 
--- dimensiones y tiles
+-- dimensiones del mapa
 MAP_W=16
 MAP_H=14
-TILE_BRICK=11
 
 -- tamano logico del mundo en pixeles
 -- pico8.constraint.sprite-size
 WORLD_W=MAP_W*8
 WORLD_H=MAP_H*8
-TILE_METAL=12
-TILE_BASE_ALLY=13
-TILE_BASE_ENEMY=14
 
 -- posiciones de bases; valores por defecto para _init() previo a map_generate()
 BASE_ENEMY_X=7
 BASE_ALLY_X=7
-
--- flags de sprite (pico8.api.fget)
-FLAG_SOLID=0
-FLAG_BREAKABLE=1
-FLAG_BASE=2
 
 function map_init()
  -- configurar flags de sprite en runtime
@@ -37,6 +28,11 @@ function map_init()
  fset(TILE_BASE_ALLY,FLAG_BASE,true)
  fset(TILE_BASE_ENEMY,FLAG_SOLID,true)
  fset(TILE_BASE_ENEMY,FLAG_BASE,true)
+ -- nuevos tiles de terreno
+ fset(TILE_FOREST,FLAG_OVERLAY,true)
+ fset(TILE_ICE,FLAG_SLIDE,true)
+ fset(TILE_SAND,FLAG_SLOW,true)
+ fset(TILE_WATER,FLAG_SOLID,true)
 end
 
 function map_clear()
@@ -266,4 +262,50 @@ function map_find_empty_top_spawn()
  end
  -- fallback: posicion segura conocida
  return 7,1
+end
+
+-- consulta generica de flag en tile (pico8.api.fget)
+function map_tile_is(tx,ty,flag)
+ if tx<0 or tx>=MAP_W or ty<0 or ty>=MAP_H then
+  return false
+ end
+ return fget(mget(tx,ty),flag)
+end
+
+-- tipo de suelo bajo una entidad para aplicar fisica
+function map_get_ground_type(tx,ty)
+ if map_tile_is(tx,ty,FLAG_SLIDE) then
+  return "slide"
+ elseif map_tile_is(tx,ty,FLAG_SLOW) then
+  return "slow"
+ end
+ return "normal"
+end
+
+-- dibujar tiles que deben aparecer sobre las entidades
+-- pico8.api.spr, pico8.constraint.sprite-size
+function map_draw_overlay()
+ for tx=0,MAP_W-1 do
+  for ty=0,MAP_H-1 do
+   local tile=mget(tx,ty)
+   if fget(tile,FLAG_OVERLAY) then
+    spr(tile,tx*8,ty*8)
+   end
+  end
+ end
+end
+
+-- constante para colocar tiles de prueba durante el desarrollo
+-- desactivada para la version jugable; activar solo para validacion local
+PLACE_TEST_TILES=false
+
+function map_place_test_tiles()
+ if not PLACE_TEST_TILES then return end
+ -- posiciones seguras, fuera de zonas de base y del spawn del jugador
+ -- (3,6) bosque, (5,6) hielo, (7,6) arena, (9,6) agua
+ mset(3,6,TILE_FOREST)
+ mset(4,6,TILE_FOREST)
+ mset(5,6,TILE_ICE)
+ mset(7,6,TILE_SAND)
+ mset(9,6,TILE_WATER)
 end

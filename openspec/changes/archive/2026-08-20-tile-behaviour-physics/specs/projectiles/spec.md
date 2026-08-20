@@ -1,6 +1,6 @@
 ## MODIFIED Requirements
 
-### Requirement: La bala avanza y desaparece al salir de la arena, por tiempo o al impactar un tile que no sea atravesable para balas
+### Requirement: La bala avanza y desaparece al salir de la arena, por tiempo o al impactar un tile sólido
 Toda bala SHALL moverse a velocidad constante por frame en su direccion de disparo. La bala SHALL desaparecer cuando sale de los limites de la arena, cuando supera su vida maxima o cuando impacta un tile cuya entrada en `BULLET_TILE_ACT` sea distinta de `BULLET_PASS`. Los tiles de agua y bosque tienen acción `BULLET_PASS`, por lo que las balas los atraviesan.
 
 #### Scenario: Bala fuera de arena
@@ -20,7 +20,7 @@ Toda bala SHALL moverse a velocidad constante por frame en su direccion de dispa
 - **THEN** la bala no desaparece
 - **THEN** la bala no altera el tile de agua
 
-### Requirement: La bala interactúa con tiles del mapa según BULLET_TILE_ACT
+### Requirement: La bala interactúa con tiles del mapa
 Una bala SHALL detectar el tile que ocupa su centro en cada frame y consultar `BULLET_TILE_ACT[mget(tx,ty)]`. Si la acción es `BULLET_DESTROY`, la bala SHALL destruir el tile (convertirlo a tile vacío con `mset`) y desaparecer. Si la acción es `BULLET_BOUNCE`, la bala SHALL desaparecer sin alterar el tile. Si la acción es `BULLET_VICTORY`, la bala SHALL desaparecer y activar el estado de victoria. Si la acción es `BULLET_GAMEOVER`, la bala SHALL desaparecer y activar el estado de game over. Si la acción es `BULLET_PASS`, la bala SHALL continuar sin alterar el tile.
 
 #### Scenario: Bala destruye ladrillo

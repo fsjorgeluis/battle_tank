@@ -19,8 +19,14 @@ COL_DKGREY=5
 
 -- movimiento
 SPEED_MAX=1.5
-SPEED_ACCEL=0.15
-SPEED_FRICTION=0.9
+SPEED_ACCEL=0.3
+SPEED_FRICTION=0.8
+
+-- fisica de tiles (pico8.api.fget, pico8.api.fset)
+SPEED_ICE_FRICTION=0.98
+SPEED_ICE_ACCEL_MULT=0.5
+SPEED_SAND_MAX_MULT=0.5
+SPEED_SAND_ACCEL_MULT=0.5
 
 -- invulnerabilidad
 BLINK_HZ=8
@@ -34,6 +40,55 @@ SPR_PLAYER=0
 SPR_PLAYER_FLAT=1
 SPR_ENEMY=4
 SPR_HEART=8
+
+-- tiles existentes
+TILE_BRICK=11
+TILE_METAL=12
+TILE_BASE_ALLY=13
+TILE_BASE_ENEMY=14
+
+-- tiles de terreno (sprite 20=bosque, 21=hielo, 22=agua, 23=arena)
+TILE_FOREST=20
+TILE_ICE=21
+TILE_WATER=22
+TILE_SAND=23
+
+-- identificadores de sprites de terreno
+SPR_TILE_FOREST_1=20
+SPR_TILE_ICE=21
+SPR_TILE_WATER_1=22
+SPR_TILE_SAND=23
+SPR_TILE_FOREST_2=24
+SPR_TILE_WATER_2=25
+
+-- flags de sprite (pico8.api.fget, pico8.api.fset)
+FLAG_SOLID=0
+FLAG_BREAKABLE=1
+FLAG_BASE=2
+FLAG_SLOW=3
+FLAG_SLIDE=4
+FLAG_OVERLAY=5
+
+-- acciones de bala contra tiles
+BULLET_PASS=0
+BULLET_DESTROY=1
+BULLET_BOUNCE=2
+BULLET_VICTORY=3
+BULLET_GAMEOVER=4
+
+-- tabla de interaccion bala->tile
+-- cualquier tile no listado se trata como BULLET_BOUNCE
+BULLET_TILE_ACT={
+ [TILE_BRICK]=BULLET_DESTROY,
+ [TILE_METAL]=BULLET_BOUNCE,
+ [TILE_BASE_ALLY]=BULLET_GAMEOVER,
+ [TILE_BASE_ENEMY]=BULLET_VICTORY,
+ [TILE_FOREST]=BULLET_PASS,
+ [TILE_ICE]=BULLET_PASS,
+ [TILE_SAND]=BULLET_PASS,
+ [TILE_WATER]=BULLET_PASS
+}
+setmetatable(BULLET_TILE_ACT,{__index=function(t,k) return BULLET_BOUNCE end})
 
 -- posiciones iniciales
 PLAYER_X=16

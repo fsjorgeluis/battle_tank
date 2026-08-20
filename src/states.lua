@@ -15,6 +15,7 @@ end
 
 function st_reset()
  map_generate()
+ map_place_test_tiles()
  tr_init()
  pl_init()
  en_init()

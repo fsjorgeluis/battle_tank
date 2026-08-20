@@ -12,7 +12,8 @@ function pl_init()
  pl.x=BASE_ALLY_X*8+4
  pl.y=10*8+4
  pl.body_a=0
- pl.speed=0
+ pl.vx=0
+ pl.vy=0
  pl.lifes=INITIAL_LIFES
  pl.invuln_until=0
  pl.prev_x=pl.x
@@ -59,7 +60,7 @@ function pl_update()
  pl.prev_x=pl.x
  pl.prev_y=pl.y
 
- -- direccion: flechas → angulo + aceleracion
+ -- direccion: flechas → angulo (canon/cuerpo)
  -- prioridad: primera flecha detectada gana
  -- pico8.api.btn
  local dir=nil
@@ -69,21 +70,46 @@ function pl_update()
  elseif btn(3) then dir=0.75 -- abajo
  end
 
+ -- fisica segun tile bajo el centro del tanque
+ -- pico8.api.fget
+ local tx=flr(pl.x/8)
+ local ty=flr(pl.y/8)
+ local gnd=map_get_ground_type(tx,ty)
+ local accel=SPEED_ACCEL
+ local max_spd=SPEED_MAX
+ local friction=SPEED_FRICTION
+ if gnd=="slow" then
+   accel=SPEED_ACCEL*SPEED_SAND_ACCEL_MULT
+   max_spd=SPEED_MAX*SPEED_SAND_MAX_MULT
+  elseif gnd=="slide" then
+   accel=SPEED_ACCEL*SPEED_ICE_ACCEL_MULT
+   friction=SPEED_ICE_FRICTION
+  end
+
  if dir then
   pl.body_a=dir
-  pl.speed=pl.speed+SPEED_ACCEL
- else
-  -- sin tecla: friccion
-  pl.speed=pl.speed*SPEED_FRICTION
+  -- acelerar vector vx,vy en la direccion del canon
+  -- pico8.api.cos, pico8.api.sin
+  pl.vx=pl.vx+cos(pl.body_a)*accel
+  pl.vy=pl.vy+sin(pl.body_a)*accel
  end
- pl.speed=ut_clamp(pl.speed,0,SPEED_MAX)
+
+ -- aplicar friccion
+ pl.vx=pl.vx*friction
+ pl.vy=pl.vy*friction
+
+ -- clampar magnitud de velocidad
+ -- pico8.api.sqrt
+ local mag=sqrt(pl.vx*pl.vx+pl.vy*pl.vy)
+ if mag>max_spd then
+  local s=max_spd/mag
+  pl.vx=pl.vx*s
+  pl.vy=pl.vy*s
+ end
 
  -- integrar movimiento
- -- pico8.api.cos, pico8.api.sin
- local dx=cos(pl.body_a)*pl.speed
- local dy=sin(pl.body_a)*pl.speed
- pl.x=pl.x+dx
- pl.y=pl.y+dy
+ pl.x=pl.x+pl.vx
+ pl.y=pl.y+pl.vy
 
  -- integrar retroceso
  pl.rx=pl.rx*RECOIL_FRICTION
@@ -91,17 +117,20 @@ function pl_update()
  pl.x=pl.x+pl.rx
  pl.y=pl.y+pl.ry
 
+ -- velocidad real para sonido/rastro
+ local real_spd=sqrt(pl.vx*pl.vx+pl.vy*pl.vy)
+
  -- motor: deteccion de flanco
  -- pico8.api.sfx
- if pl.speed>=0.15 and not pl.motor_on then
+ if real_spd>=0.15 and not pl.motor_on then
   sfx(SFX_MOTOR,CH_MOTOR)
   pl.motor_on=true
- elseif pl.speed<0.15 and pl.motor_on then
+ elseif real_spd<0.15 and pl.motor_on then
   sfx(-1,CH_MOTOR)
   pl.motor_on=false
  end
 
- -- colision solida con enemigos (antes de clamp de arena)
+ -- colision solida con enemigos (antes de resolver tiles)
  local px1=pl.x-COLLISION_INSET
  local py1=pl.y-COLLISION_INSET
  local px2=pl.x+COLLISION_INSET
@@ -125,13 +154,17 @@ function pl_update()
   if ut_aabb_overlap(px1,py1,px2,py2,ex1,ey1,ex2,ey2) then
    pl.x=pl.prev_x
    pl.y=pl.prev_y
+   pl.vx=0
+   pl.vy=0
   end
  end
 
- -- colision con tiles solidos (ladrillo, metal, bases)
+ -- colision con tiles solidos (ladrillo, metal, bases, agua)
  if pl_enters_solid(pl.x,pl.y) then
   pl.x=pl.prev_x
   pl.y=pl.prev_y
+  pl.vx=0
+  pl.vy=0
  end
 
  -- clamp a los limites logicos del mundo
@@ -141,7 +174,7 @@ function pl_update()
 
  -- emitir rastro de orugas segun velocidad real
  -- pico8.concept.game-loop
- tr_emit(pl.x,pl.y,pl.body_a,pl.speed)
+ tr_emit(pl.x,pl.y,pl.body_a,real_spd)
 end
 
 function pl_draw()

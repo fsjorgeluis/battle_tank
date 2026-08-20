@@ -33,10 +33,7 @@ MUZZLE={[0]={3,0},[0.25]={0,-3.5},[0.5]={-3,0},[0.75]={0,3.5}}
   integrado (usando tabla `MUZZLE`)
 
 ### Requirement: La bala avanza y desaparece al salir de la arena, por tiempo o al impactar un tile sólido
-Toda bala SHALL moverse a velocidad constante por frame en su direccion de
-disparo. La bala SHALL desaparecer cuando sale de los limites de la arena
-(128x128), cuando supera su vida maxima o cuando impacta un tile sólido del
-mapa.
+Toda bala SHALL moverse a velocidad constante por frame en su direccion de disparo. La bala SHALL desaparecer cuando sale de los limites de la arena, cuando supera su vida maxima o cuando impacta un tile cuya entrada en `BULLET_TILE_ACT` sea distinta de `BULLET_PASS`. Los tiles de agua y bosque tienen acción `BULLET_PASS`, por lo que las balas los atraviesan.
 
 #### Scenario: Bala fuera de arena
 - **WHEN** una bala sale de los limites de la arena
@@ -47,8 +44,13 @@ mapa.
 - **THEN** la bala desaparece de la lista de balas
 
 #### Scenario: Bala impacta muro
-- **WHEN** una bala impacta un tile sólido (ladrillo, metal o base)
+- **WHEN** una bala impacta un tile cuya acción es `BULLET_DESTROY` o `BULLET_BOUNCE` (ladrillo, metal o base)
 - **THEN** la bala desaparece de la lista de balas
+
+#### Scenario: Bala cruza agua
+- **WHEN** una bala cruza un tile de agua
+- **THEN** la bala no desaparece
+- **THEN** la bala no altera el tile de agua
 
 ### Requirement: La bala mata al enemigo al colisionar
 Una bala SHALL colisionar con el enemigo vivo cuando su caja AABB se solapa
@@ -64,12 +66,7 @@ SHALL morir y el marcador SHALL incrementarse en `KILL_POINTS`.
 - **THEN** la bala desaparece por limite de arena o tiempo de vida
 
 ### Requirement: La bala interactúa con tiles del mapa
-Una bala SHALL detectar el tile que ocupa su centro en cada frame. Si el
-tile tiene el flag 1 (rompible) la bala SHALL destruirlo (convertirlo a tile
-vacío con `mset`) y desaparecer. Si el tile tiene el flag 0 (sólido) pero no
-el flag 1 (rompible) la bala SHALL desaparecer sin alterar el tile. Si el
-tile tiene el flag 2 (base) la bala SHALL desaparecer y notificar al sistema
-de estado para la condición de victoria o derrota.
+Una bala SHALL detectar el tile que ocupa su centro en cada frame y consultar `BULLET_TILE_ACT[mget(tx,ty)]`. Si la acción es `BULLET_DESTROY`, la bala SHALL destruir el tile (convertirlo a tile vacío con `mset`) y desaparecer. Si la acción es `BULLET_BOUNCE`, la bala SHALL desaparecer sin alterar el tile. Si la acción es `BULLET_VICTORY`, la bala SHALL desaparecer y activar el estado de victoria. Si la acción es `BULLET_GAMEOVER`, la bala SHALL desaparecer y activar el estado de game over. Si la acción es `BULLET_PASS`, la bala SHALL continuar sin alterar el tile.
 
 #### Scenario: Bala destruye ladrillo
 - **WHEN** una bala impacta un tile de ladrillo (sprite 11)
@@ -90,3 +87,13 @@ de estado para la condición de victoria o derrota.
 - **WHEN** una bala impacta la base aliada (sprite 13)
 - **THEN** la bala desaparece
 - **THEN** el sistema activa el estado de game over
+
+#### Scenario: Bala atraviesa bosque
+- **WHEN** una bala cruza un tile de bosque
+- **THEN** el bosque permanece intacto
+- **THEN** la bala continúa su trayectoria
+
+#### Scenario: Bala atraviesa agua
+- **WHEN** una bala cruza un tile de agua
+- **THEN** el agua permanece intacta
+- **THEN** la bala continúa su trayectoria

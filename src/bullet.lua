@@ -66,22 +66,24 @@ function bl_update()
       else
        local tile=mget(ttx,tty)
        if tile~=0 then
-        if fget(tile,FLAG_BASE) then
-         -- base enemiga = victoria, base aliada = game over
-         if tile==TILE_BASE_ENEMY then
-          st_set_state(GS_VICTORY)
-         else
-          st_set_state(GS_GAMEOVER)
-         end
-         hit=true
-         break
-        elseif fget(tile,FLAG_BREAKABLE) then
+        local act=BULLET_TILE_ACT[tile]
+        if act==BULLET_PASS then
+         -- atraviesa: nada que hacer
+        elseif act==BULLET_DESTROY then
          -- destruir ladrillo
          mset(ttx,tty,0)
          hit=true
          break
-        elseif fget(tile,FLAG_SOLID) then
-         -- rebotar en metal/borde sin destruir
+        elseif act==BULLET_VICTORY then
+         st_set_state(GS_VICTORY)
+         hit=true
+         break
+        elseif act==BULLET_GAMEOVER then
+         st_set_state(GS_GAMEOVER)
+         hit=true
+         break
+        else
+         -- BULLET_BOUNCE u otro valor por defecto
          hit=true
          break
         end

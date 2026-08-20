@@ -31,6 +31,9 @@ function ui_draw_play()
  fx_draw()
  pl_draw()
  bl_draw()
+ -- capa de tiles que deben dibujarse sobre entidades (bosque)
+ -- pico8.api.spr
+ map_draw_overlay()
  -- restablecer camara para dibujar HUD en coordenadas de pantalla
  -- pico8.api.camera
  camera(0,0)
