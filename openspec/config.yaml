@@ -3,9 +3,48 @@ schema: spec-driven
 # Contexto del proyecto. Se inyecta en TODOS los artefactos generados.
 context: |
   # Proyecto
-  Videojuego para PICO-8 (cartucho .p8). Repositorio greenfield:
-  no existe código de juego todavía; todo el desarrollo sigue el flujo OpenSpec
-  y el skill `pico8-development`.
+  Videojuego para PICO-8 (cartucho .p8) llamado **battle tank**.
+  Repositorio brownfield: el juego base ya está implementado y funcional.
+  Los cambios futuros siguen el flujo OpenSpec y el skill `pico8-development`.
+
+  # Género y mecánicas principales
+  - Shooter de tanques con vista cenital, de un jugador.
+  - Objetivo: destruir la base enemiga protegiendo la base aliada.
+  - Control del tanque del jugador en 4 direcciones (arriba, abajo, izquierda,
+    derecha) con aceleración, fricción y física de terreno.
+  - Disparo simple con cooldown; balas destruyen ladrillos, rebotan en metal,
+    atraviesan terrenos y destruyen la base enemiga para ganar.
+  - Colisión con enemigos resta vidas; el jugador tiene vidas limitadas.
+  - Progresión por 8 niveles, cada uno con un bioma propio que altera la
+    generación del mapa y la paleta de colores.
+
+  # Arquitectura actual
+  - Cartucho principal: `battle_tank.p8`; carga 11 tabs mediante `#INCLUDE`
+    bajo `src/`.
+  - Módulos y responsabilidades:
+    - `const.lua`: constantes semánticas (estados, colores, movimiento,
+      sprites, tiles, flags, SFX, etc.).
+    - `util.lua`: funciones puras reutilizables (`ut_aabb_overlap`,
+      `ut_clamp`).
+    - `biome.lua`: definición de 8 biomas, selección por pesos, paletas y
+      tabla de oleadas por nivel (`LEVEL_WAVES`).
+    - `map.lua`: generación procedural del mapa (16x14 tiles) por división
+      recursiva, erosión, colocación de bases, borde de metal, conectividad
+      BFS y consultas de colisión/terreno.
+    - `track.lua`: rastro de orugas transitorio para jugador y enemigos.
+    - `states.lua`: máquina de estados global (`GS_MENU`, `GS_PLAY`,
+      `GS_LEVEL_CLEAR`, `GS_GAMEOVER`, `GS_VICTORY`) y transiciones.
+    - `player.lua`: estado, input, física, colisiones y render del tanque
+      jugador.
+    - `enemy.lua`: lista de enemigos, HP, tintes por daño y lógica de
+      respawn/oleadas.
+    - `bullet.lua`: balas del jugador, colisiones con tiles/enemigos,
+      retroceso y efectos de victoria/derrota.
+    - `fx.lua`: efectos visuales transitorios (explosiones e impactos).
+    - `ui.lua`: menú, HUD, pantallas de game over/victoria y banner de bioma.
+  - Estado global agrupado en tablas (`gs`, `pl`, `enemies`, `bullets`,
+    `fx_list`, `tracks`), minimizando variables sueltas.
+  - Bucle de PICO-8: `_init`, `_update`, `_draw` a 30 fps.
 
   # Plataforma y stack
   - Plataforma: PICO-8 v0.2.7 (fantasy console, juego por software).
@@ -95,7 +134,7 @@ context: |
   # Convenciones
   - Idioma de la documentación y artefactos: español.
   - Nombres de funciones globales del juego con prefijo de módulo
-    (p.ej. `td_init_waves`, `td_update_enemies`).
+    (p.ej. `map_generate`, `pl_update`, `en_draw`, `bl_fire`).
   - Constantes semánticas en MAYÚSCULAS (colores, estados, configuración de
     oleadas); variables locales en snake_case.
   - Minimizar estado global: solo el mínimo compartido, agrupado en tablas.
@@ -118,6 +157,8 @@ context: |
     bordes y regresión, con criterios reproducibles.
 
   # Referencias
+  - Cartucho principal: `battle_tank.p8`.
+  - Código fuente modular: `src/*.lua`.
   - Fuente autorizada: `sources/pico8-manual-v0.2.7.html`.
   - Índice de conocimiento: `knowledge/index.md`.
   - Skill de desarrollo: `.opencode/skills/pico8-development/` (contrato de
