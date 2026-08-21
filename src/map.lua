@@ -178,65 +178,69 @@ function map_scatter_metal(count)
 end
 
 function map_check_connectivity()
- -- bfs ligero desde spawn aliado (fila 10) hasta vecindad de base enemiga
- -- pico8.api.add, pico8.api.abs
- local v={}
- local q={{BASE_ALLY_X,10}}
- v[BASE_ALLY_X*16+10]=true
- local head=1
- while head<=#q do
-  local c=q[head]
-  head= head + 1
-  local x,y=c[1],c[2]
-  -- distancia chebyshev <=2 de la base enemiga (y<=3)
-  if abs(x-BASE_ENEMY_X)<=2 and y<=3 then
-   return true
-  end
-  for dx=-1,1 do
-   for dy=-1,1 do
-    if dx~=0 or dy~=0 then
-     local nx,ny=x+dx,y+dy
+  -- bfs ligero desde spawn aliado (fila 10) hasta vecindad de base enemiga
+  -- considera transitables todos los tiles que no tengan FLAG_SOLID
+  -- pico8.api.add, pico8.api.abs
+  local v={}
+  local q={{BASE_ALLY_X,10}}
+  v[BASE_ALLY_X*16+10]=true
+  local head=1
+  while head<=#q do
+   local c=q[head]
+   head=head+1
+   local x,y=c[1],c[2]
+   -- distancia chebyshev <=2 de la base enemiga (y<=3)
+   if abs(x-BASE_ENEMY_X)<=2 and y<=3 then
+    return true
+   end
+   for dx=-1,1 do
+    for dy=-1,1 do
+     if dx~=0 or dy~=0 then
+      local nx,ny=x+dx,y+dy
       local k=nx*16+ny
-      if nx>=1 and nx<=14 and ny>=1 and ny<=MAP_H-2 and not v[k] and mget(nx,ny)==0 then
-      v[k]=true
-      add(q,{nx,ny})
+      if nx>=1 and nx<=14 and ny>=1 and ny<=MAP_H-2 and not v[k] and not map_tile_is(nx,ny,FLAG_SOLID) then
+       v[k]=true
+       add(q,{nx,ny})
+      end
      end
     end
    end
   end
+  return false
  end
- return false
-end
 
-function map_generate()
- local attempts=0
- repeat
-  BASE_ENEMY_X=flr(rnd(12))+2
-  BASE_ALLY_X=flr(rnd(12))+2
-  map_clear()
-  -- dejar borde como ladrillo y limpiar interior
-  for x=1,MAP_W-2 do
-   for y=1,MAP_H-2 do
-    mset(x,y,0)
+function map_generate(level)
+  level=level or 1
+  local attempts=0
+  repeat
+   BASE_ENEMY_X=flr(rnd(12))+2
+   BASE_ALLY_X=flr(rnd(12))+2
+   map_clear()
+   -- dejar borde como ladrillo y limpiar interior
+   for x=1,MAP_W-2 do
+    for y=1,MAP_H-2 do
+     mset(x,y,0)
+    end
    end
-  end
-  -- generar laberinto perfecto respetando zonas de base
-  map_recursive_division(1,1,MAP_W-2,MAP_H-2)
-  -- erosionar paredes para crear rutas alternativas
-  map_erode_walls(0.10)
-  -- colocar bases en camaras 3x2 selladas
-  map_place_bases()
- -- asegurar espacio de spawn del jugador (2 filas arriba de la base aliada)
- mset(BASE_ALLY_X-1,10,0)
- mset(BASE_ALLY_X,10,0)
- mset(BASE_ALLY_X+1,10,0)
-  -- marco de metal irrompible
-  map_place_metal_border()
-  -- bloques de metal interiores
-  map_scatter_metal(flr(rnd(6))+5)
-  attempts= attempts + 1
- until map_check_connectivity() or attempts>=10
-end
+   -- generar laberinto perfecto respetando zonas de base
+   map_recursive_division(1,1,MAP_W-2,MAP_H-2)
+   -- erosionar paredes para crear rutas alternativas
+   map_erode_walls(0.10)
+   -- colocar bases en camaras 3x2 selladas
+   map_place_bases()
+   -- asegurar espacio de spawn del jugador (2 filas arriba de la base aliada)
+   mset(BASE_ALLY_X-1,10,0)
+   mset(BASE_ALLY_X,10,0)
+   mset(BASE_ALLY_X+1,10,0)
+   -- marco de metal irrompible
+   map_place_metal_border()
+   -- bloques de metal interiores
+   map_scatter_metal(flr(rnd(6))+5)
+   -- revestimiento de bioma y verificacion de conectividad
+   biome_dress(level)
+   attempts=attempts+1
+  until map_check_connectivity() or attempts>=10
+ end
 
 -- consulta de colision: true si el tile es solido
 function map_is_solid(tx,ty)
@@ -246,22 +250,22 @@ function map_is_solid(tx,ty)
  return fget(mget(tx,ty),FLAG_SOLID)
 end
 
--- devuelve tile vacio del borde superior (filas 1 o 2)
+-- devuelve tile transitable del borde superior (filas 1 o 2)
 function map_find_empty_top_spawn()
- local candidates={}
- for x=1,MAP_W-2 do
-  for y=1,2 do
-   if mget(x,y)==0 and not map_is_base_zone(x,y) then
-    add(candidates,{x,y})
+  local candidates={}
+  for x=1,MAP_W-2 do
+   for y=1,2 do
+    if not map_is_base_zone(x,y) and not map_tile_is(x,y,FLAG_SOLID) then
+     add(candidates,{x,y})
+    end
    end
   end
- end
- if #candidates>0 then
-  local c=candidates[flr(rnd(#candidates))+1]
-  return c[1],c[2]
- end
- -- fallback: posicion segura conocida
- return 7,1
+  if #candidates>0 then
+   local c=candidates[flr(rnd(#candidates))+1]
+   return c[1],c[2]
+  end
+  -- fallback: posicion segura conocida
+  return 7,1
 end
 
 -- consulta generica de flag en tile (pico8.api.fget)

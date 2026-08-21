@@ -74,10 +74,10 @@ function bl_update()
          mset(ttx,tty,0)
          hit=true
          break
-        elseif act==BULLET_VICTORY then
-         st_set_state(GS_VICTORY)
-         hit=true
-         break
+         elseif act==BULLET_VICTORY then
+          st_set_state(GS_LEVEL_CLEAR)
+          hit=true
+          break
         elseif act==BULLET_GAMEOVER then
          st_set_state(GS_GAMEOVER)
          hit=true

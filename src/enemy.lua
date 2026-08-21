@@ -5,13 +5,15 @@
 enemies={}
 en={next_respawn=0,last_zone=0}
 
-function en_init()
+function en_init(level)
  enemies={}
  en.next_respawn=0
  en.last_zone=0
- -- spawn inicial en borde superior aleatorio
- local tx,ty=map_find_empty_top_spawn()
- add(enemies,{x=tx*8+4,y=ty*8+4,hp=ENEMY_HP,flash_until=0,dir=0,speed=0})
+ -- sembrar oleada completa del nivel en el borde superior
+ for i=1,LEVEL_WAVES[level] do
+  local tx,ty=map_find_empty_top_spawn()
+  add(enemies,{x=tx*8+4,y=ty*8+4,hp=ENEMY_HP,flash_until=0,dir=0,speed=0})
+ end
 end
 
 function en_hit(e)
@@ -41,15 +43,9 @@ end
 function en_kill(e)
  del(enemies,e)
  gs.game.score=gs.game.score+KILL_POINTS
- en.next_respawn=t()+RESPAWN_TIME
 end
 
 function en_update()
- if #enemies==0 and t()>=en.next_respawn then
-  -- respawn en borde superior aleatorio
-  local tx,ty=map_find_empty_top_spawn()
-  add(enemies,{x=tx*8+4,y=ty*8+4,hp=ENEMY_HP,flash_until=0,dir=0,speed=0})
- end
  -- emitir rastro para enemigos en movimiento
  for e in all(enemies) do
   tr_emit(e.x,e.y,e.dir,e.speed)

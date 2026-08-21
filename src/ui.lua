@@ -23,9 +23,12 @@ function ui_draw_play()
  -- desplazar origen del mundo para dejar franja del HUD libre
  -- pico8.api.camera
  camera(0,-HUD_H)
- -- dibujar mapa antes que entidades
- -- pico8.api.map
+ -- dibujar mapa con paleta del bioma
+ -- pico8.api.map, pico8.api.pal
+ biome_apply_palette(gs.game.level)
  map(0,0,0,0,16,14)
+ biome_reset_palette()
+ -- entidades con paleta por defecto
  tr_draw()
  en_draw()
  fx_draw()
@@ -33,20 +36,23 @@ function ui_draw_play()
  bl_draw()
  -- capa de tiles que deben dibujarse sobre entidades (bosque)
  -- pico8.api.spr
+ biome_apply_palette(gs.game.level)
  map_draw_overlay()
+ biome_reset_palette()
  -- restablecer camara para dibujar HUD en coordenadas de pantalla
  -- pico8.api.camera
  camera(0,0)
  ui_draw_hud()
 end
 
--- HUD: corazones, toques y puntos
+-- HUD: corazones, nivel, toques y puntos
 function ui_draw_hud()
  -- pico8.api.spr
  for i=1,pl.lifes do
   spr(SPR_HEART,(i-1)*10,1)
  end
  color(COL_TEXT)
+ print("nivel:"..gs.game.level,34,1)
  print("toques:"..gs.game.hits,60,1)
  print("puntos:"..gs.game.score,60,9)
 end
@@ -69,4 +75,19 @@ function ui_draw_victory()
  print("base enemiga destruida",18,55,COL_TEXT)
  print("puntos: "..gs.game.score,20,65,COL_TEXT)
  print("x para reintentar",24,80,COL_GREY)
+end
+
+-- banner con el nombre del bioma al iniciar nivel
+function ui_draw_level_banner(level)
+ local name=biome_name(level)
+ local x=64-#name*2
+ local y=56
+ print(name,x+1,y+1,COL_DARK)
+ print(name,x,y,COL_TEXT)
+end
+
+-- pantalla intermedia de nivel completado
+function ui_draw_level_clear()
+ ui_draw_play()
+ ui_draw_level_banner(gs.game.level+1)
 end

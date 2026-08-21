@@ -3,6 +3,7 @@ version 43
 __lua__
 #include src/const.lua
 #include src/util.lua
+#include src/biome.lua
 #include src/map.lua
 #include src/track.lua
 #include src/states.lua
@@ -14,12 +15,12 @@ __lua__
 
 function _init()
  map_init()
- map_generate()
- map_place_test_tiles()
  st_init()
+ map_generate(gs.game.level)
+ map_place_test_tiles()
  tr_init()
  pl_init()
- en_init()
+ en_init(gs.game.level)
  bl_init()
 end
 
