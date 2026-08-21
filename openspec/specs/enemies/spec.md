@@ -43,24 +43,42 @@ Un enemigo vivo SHALL causar daño al jugador si los cuerpos de ambos colisionan
 - **THEN** el tanque no lo atraviesa y queda detenido contra él
 - **THEN** el jugador puede rodearlo girando y avanzando por otro lado
 
-### Requirement: El enemigo reaparece en otra zona tras morir
-Cuando no queda ningún enemigo vivo, el juego SHALL reaparecer un enemigo en una posición definida de la arena distinta de la que ocupaba el enemigo eliminado, después de un retardo de respawn. El enemigo reaparecido SHALL estar vivo y sujeto a las reglas de contacto y eliminación anteriores.
-
-#### Scenario: Reaparición tras eliminación
-- **WHEN** el último enemigo vivo es eliminado y transcurre el retardo de respawn
-- **THEN** aparece un enemigo vivo en una posición de respawn distinta de la anterior
-
-#### Scenario: Sin reaparición inmediata
-- **WHEN** un enemigo es eliminado y aún no ha transcurrido el retardo de respawn
-- **THEN** no aparece ningún enemigo nuevo en la arena
-
-#### Scenario: El reaparecido es un enemigo normal
-- **WHEN** un enemigo reaparece en la arena
-- **THEN** puede ser eliminado por una bala y causa daño y bloqueo por contacto como el resto de enemigos
-
 ### Requirement: Los enemigos se gestionan como una lista
 El estado de los enemigos de una partida SHALL mantenerse como una lista de enemigos, donde cada elemento modela su posición y su estado (vivo o no). Cualquier regla de contacto, bloqueo o eliminación SHALL considerar todos los elementos de la lista, no una única entidad.
 
 #### Scenario: Varios enemigos coexisten
 - **WHEN** la partida contiene más de un enemigo vivo
 - **THEN** todos se dibujan y cada uno bloquea, daña y puede ser eliminado por separado
+
+### Requirement: Cada nivel define una oleada finita de enemigos
+El sistema SHALL mantener una tabla con la cantidad de enemigos por oleada para cada uno de los 8 niveles. Al iniciar un nivel se SHALL sembrar exactamente esa cantidad de enemigos.
+
+#### Scenario: Oleada del nivel 1
+- **WHEN** comienza el nivel 1
+- **THEN** aparece la cantidad de enemigos configurada para el nivel 1
+
+#### Scenario: Oleada de nivel superior
+- **WHEN** comienza un nivel n (donde 2 ≤ n ≤ 8)
+- **THEN** aparece la cantidad de enemigos configurada para el nivel n
+- **THEN** la cantidad puede ser igual o mayor que la del nivel 1
+
+### Requirement: La oleada se marca como completada cuando no quedan enemigos vivos
+Cuando todos los enemigos de la oleada actual han sido eliminados, el sistema SHALL considerar la oleada completada y notificar al capability `level-progression` para el avance de nivel.
+
+#### Scenario: Oleada completada
+- **WHEN** el último enemigo vivo de la oleada actual es eliminado
+- **THEN** no aparece un nuevo enemigo tras el retardo de respawn
+- **THEN** el sistema marca el nivel como completado (ver capability `level-progression`)
+
+#### Scenario: Oleada sembrada al inicio de nivel
+- **WHEN** comienza un nuevo nivel
+- **THEN** aparecen los enemigos de la oleada de ese nivel en posiciones de spawn válidas
+- **THEN** todos los enemigos sembrados están vivos y sujetos a las reglas de contacto y eliminación
+
+### Requirement: Los enemigos de una oleada se gestionan como una lista
+El estado de los enemigos de una partida SHALL mantenerse como una lista de enemigos, donde cada elemento modela su posición y su estado (vivo o no). La lista se reinicia al comenzar cada nivel.
+
+#### Scenario: Lista reiniciada por nivel
+- **WHEN** comienza un nuevo nivel
+- **THEN** la lista de enemigos contiene solo los enemigos de la oleada del nuevo nivel
+- **THEN** no quedan enemigos muertos ni estados heredados del nivel anterior
