@@ -13,6 +13,9 @@ Los niveles 4 y 8 del juego actualmente se generan como biomas procedurales norm
 - Definir una **máquina de estados de 3 fases** para el boss: móvil, lesionado e inmóvil.
 - Implementar **telegrafiado visual** para los disparos de los cañones principales.
 - Ajustar `level-progression` para detectar niveles 4 y 8 y cargar la arena especial en lugar de la generación procedural.
+- Mostrar un banner de **HUD** distinto al iniciar los niveles 4 y 8: en lugar
+  del nombre de bioma (usado en niveles normales), mostrar "NIVEL X - JEFE"
+  para reflejar que el nivel usa arena fija en vez de generación procedural.
 - No se implementan efectos ambientales, iluminación, ni sprites definitivos en este cambio.
 
 ## Capabilities
@@ -28,6 +31,8 @@ Los niveles 4 y 8 del juego actualmente se generan como biomas procedurales norm
 
 - `level-progression`: Se modifica para distinguir niveles 4 y 8 como niveles de boss y cargar la arena fija en lugar del generador procedural.
 - `game-flow`: Se agrega el estado de combate de boss y la transición de victoria/derrota dentro de la arena.
+- - `hud`: Se agrega una variante de banner para niveles de boss ("NIVEL X - JEFE")
+  que reemplaza el banner de nombre de bioma en los niveles 4 y 8.
 
 ## Impact
 
